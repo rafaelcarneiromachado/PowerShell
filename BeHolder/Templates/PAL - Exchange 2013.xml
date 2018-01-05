@@ -1,0 +1,151 @@
+﻿<DataCollectorSet>
+<Name>PAL_Microsoft_Exchange_2013</Name>
+<SubdirectoryFormat>3</SubdirectoryFormat>
+<SubdirectoryFormatPattern>yyyyMMdd\-NNNNNN</SubdirectoryFormatPattern>
+<PerformanceCounterDataCollector>
+    <Name>PAL_Microsoft_Exchange_2013</Name>
+    <SampleInterval>15</SampleInterval>
+    <Counter>\.NET CLR Exceptions(*)\# of Exceps Thrown / sec</Counter>
+    <Counter>\.NET CLR Memory(*)\# Bytes in all Heaps</Counter>
+    <Counter>\.NET CLR Memory(*)\% Time in GC</Counter>
+    <Counter>\ASP.NET Applications(*)\Requests Executing</Counter>
+    <Counter>\ASP.NET Applications(*)\Requests In Application Queue</Counter>
+    <Counter>\ASP.NET Applications(*)\Requests/Sec</Counter>
+    <Counter>\ASP.NET\Application Restarts</Counter>
+    <Counter>\ASP.NET\Request Wait Time</Counter>
+    <Counter>\ASP.NET\Worker Process Restarts</Counter>
+    <Counter>\Cache\Dirty Pages</Counter>
+    <Counter>\Cache\Lazy Write Flushes/sec</Counter>
+    <Counter>\LogicalDisk(*)\% Free Space</Counter>
+    <Counter>\LogicalDisk(*)\% Idle Time</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk Bytes/Read</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk Bytes/Transfer</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk Bytes/Write</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk Queue Length</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk sec/Read</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk sec/Transfer</Counter>
+    <Counter>\LogicalDisk(*)\Avg. Disk sec/Write</Counter>
+    <Counter>\LogicalDisk(*)\Current Disk Queue Length</Counter>
+    <Counter>\LogicalDisk(*)\Disk Bytes/sec</Counter>
+    <Counter>\LogicalDisk(*)\Disk Reads/sec</Counter>
+    <Counter>\LogicalDisk(*)\Disk Transfers/sec</Counter>
+    <Counter>\LogicalDisk(*)\Disk Writes/sec</Counter>
+    <Counter>\LogicalDisk(*)\Free Megabytes</Counter>
+    <Counter>\Memory\% Committed Bytes In Use</Counter>
+    <Counter>\Memory\Available MBytes</Counter>
+    <Counter>\Memory\Commit Limit</Counter>
+    <Counter>\Memory\Committed Bytes</Counter>
+    <Counter>\Memory\Free &amp; Zero Page List Bytes</Counter>
+    <Counter>\Memory\Free System Page Table Entries</Counter>
+    <Counter>\Memory\Long-Term Average Standby Cache Lifetime (s)</Counter>
+    <Counter>\Memory\Pages Input/sec</Counter>
+    <Counter>\Memory\Pages Output/sec</Counter>
+    <Counter>\Memory\Pages/sec</Counter>
+    <Counter>\Memory\Pool Nonpaged Bytes</Counter>
+    <Counter>\Memory\Pool Paged Bytes</Counter>
+    <Counter>\Memory\Pool Paged Resident Bytes</Counter>
+    <Counter>\Memory\System Cache Resident Bytes</Counter>
+    <Counter>\Memory\Transition Pages RePurposed/sec</Counter>
+    <Counter>\MSExchange Active Manager(*)\Database Mounted</Counter>
+    <Counter>\MSExchange ActiveSync\Ping Commands Pending</Counter>
+    <Counter>\MSExchange ActiveSync\Requests/sec</Counter>
+    <Counter>\MSExchange ActiveSync\Sync Commands/sec</Counter>
+    <Counter>\MSExchange ADAccess Domain Controllers\LDAP Read Time</Counter>
+    <Counter>\MSExchange ADAccess Domain Controllers\LDAP Search Time</Counter>
+    <Counter>\MSExchange ADAccess Processes(*)\LDAP Read Time</Counter>
+    <Counter>\MSExchange ADAccess Processes(*)\LDAP Search Time</Counter>
+    <Counter>\MSExchange Availability Service\Availability Requests (sec)</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Reads (Attached) Average Latency</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Reads (Attached)/sec</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Reads (Recovery) Average Latency</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Writes (Attached) Average Latency</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Writes (Attached)/sec</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Database Writes (Recovery) Average Latency</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Log Writes Average Latency</Counter>
+    <Counter>\MSExchange Database ==> Instances(*)\I/O Log Writes/sec</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Average Authentication Latency</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Average ClientAccess Server Processing Latency</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Mailbox Server Proxy Failure Rate</Counter>
+    <Counter>\MSExchange HttpProxy(*)\MailboxServerLocator Average Latency</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Outstanding Proxy Requests</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Proxy Requests/Sec</Counter>
+    <Counter>\MSExchange HttpProxy(*)\Requests/Sec</Counter>
+    <Counter>\MSExchange OWA\Current Unique Users</Counter>
+    <Counter>\MSExchange OWA\Requests/sec</Counter>
+    <Counter>\MSExchange RpcClientAccess\Active User Count</Counter>
+    <Counter>\MSExchange RpcClientAccess\Connection Count</Counter>
+    <Counter>\MSExchange RpcClientAccess\RPC Averaged Latency</Counter>
+    <Counter>\MSExchange RpcClientAccess\RPC Operations/sec</Counter>
+    <Counter>\MSExchange RpcClientAccess\RPC Requests</Counter>
+    <Counter>\MSExchange RpcClientAccess\User Count</Counter>
+    <Counter>\MSExchange WorkloadManagement Workloads(*)\ActiveTasks</Counter>
+    <Counter>\MSExchange WorkloadManagement Workloads(*)\CompletedTasks</Counter>
+    <Counter>\MSExchange WorkloadManagement Workloads(*)\QueuedTasks</Counter>
+    <Counter>\MSExchangeAutodiscover\Requests/sec</Counter>
+    <Counter>\MSExchangeIS Client Type(*)\RPC Average Latency</Counter>
+    <Counter>\MSExchangeIS Client Type(_total)\RPC Operations/sec</Counter>
+    <Counter>\MSExchangeIS Client Type(_total)\RPC Requests</Counter>
+    <Counter>\MSExchangeIS Store(*)\RPC Average Latency</Counter>
+    <Counter>\MSExchangeIS Store(*)\RPC Operations/sec</Counter>
+    <Counter>\MSExchangeWS\Requests/sec</Counter>
+    <Counter>\Netlogon(*)\Average Semaphore Hold Time</Counter>
+    <Counter>\Netlogon(*)\Semaphore Acquires</Counter>
+    <Counter>\Netlogon(*)\Semaphore Holders</Counter>
+    <Counter>\Netlogon(*)\Semaphore Timeouts</Counter>
+    <Counter>\Netlogon(*)\Semaphore Waiters</Counter>
+    <Counter>\Network Inspection System\Average inspection latency (sec/bytes)</Counter>
+    <Counter>\Network Interface(*)\Bytes Received/sec</Counter>
+    <Counter>\Network Interface(*)\Bytes Sent/sec</Counter>
+    <Counter>\Network Interface(*)\Bytes Total/sec</Counter>
+    <Counter>\Network Interface(*)\Current Bandwidth</Counter>
+    <Counter>\Network Interface(*)\Output Queue Length</Counter>
+    <Counter>\Network Interface(*)\Packets Outbound Errors</Counter>
+    <Counter>\Network Interface(*)\Packets Received/sec</Counter>
+    <Counter>\Network Interface(*)\Packets Sent/sec</Counter>
+    <Counter>\Network Interface(*)\Packets/sec</Counter>
+    <Counter>\Paging File(*)\% Usage</Counter>
+    <Counter>\PhysicalDisk(*)\Avg. Disk Queue Length</Counter>
+    <Counter>\PhysicalDisk(*)\Avg. Disk sec/Read</Counter>
+    <Counter>\PhysicalDisk(*)\Avg. Disk sec/Write</Counter>
+    <Counter>\PhysicalDisk(*)\Current Disk Queue Length</Counter>
+    <Counter>\PhysicalDisk(*)\Disk Bytes/sec</Counter>
+    <Counter>\Process(*)\% Privileged Time</Counter>
+    <Counter>\Process(*)\% Processor Time</Counter>
+    <Counter>\Process(*)\Handle Count</Counter>
+    <Counter>\Process(*)\ID Process</Counter>
+    <Counter>\Process(*)\IO Data Operations/sec</Counter>
+    <Counter>\Process(*)\IO Other Operations/sec</Counter>
+    <Counter>\Process(*)\IO Read Operations/sec</Counter>
+    <Counter>\Process(*)\IO Write Operations/sec</Counter>
+    <Counter>\Process(*)\Private Bytes</Counter>
+    <Counter>\Process(*)\Thread Count</Counter>
+    <Counter>\Process(*)\Virtual Bytes</Counter>
+    <Counter>\Process(*)\Working Set</Counter>
+    <Counter>\Processor Information(*)\% DPC Time</Counter>
+    <Counter>\Processor Information(*)\% Interrupt Time</Counter>
+    <Counter>\Processor Information(*)\% of Maximum Frequency</Counter>
+    <Counter>\Processor Information(*)\% Privileged Time</Counter>
+    <Counter>\Processor Information(*)\% Processor Time</Counter>
+    <Counter>\Processor Information(*)\% User Time</Counter>
+    <Counter>\Processor Information(*)\DPC Rate</Counter>
+    <Counter>\Processor Information(*)\Parking Status</Counter>
+    <Counter>\Processor(*)\% DPC Time</Counter>
+    <Counter>\Processor(*)\% Interrupt Time</Counter>
+    <Counter>\Processor(*)\% Privileged Time</Counter>
+    <Counter>\Processor(*)\% Processor Time</Counter>
+    <Counter>\Processor(*)\DPC Rate</Counter>
+    <Counter>\Processor(_Total)\% User Time</Counter>
+    <Counter>\Server\Pool Nonpaged Failures</Counter>
+    <Counter>\Server\Pool Paged Failures</Counter>
+    <Counter>\System\Context Switches/sec</Counter>
+    <Counter>\System\Processor Queue Length</Counter>
+    <Counter>\System\System Calls/sec</Counter>
+    <Counter>\TCPv4\Connection Failures</Counter>
+    <Counter>\TCPv4\Connections Reset</Counter>
+    <Counter>\TCPv6\Connection Failures</Counter>
+    <Counter>\TCPv6\Connections Reset</Counter>
+    <Counter>\Web Service(*)\Current Connections</Counter>
+    <Counter>\Web Service(_Total)\Connection Attempts/sec</Counter>
+    <Counter>\Web Service(_Total)\Other Request Methods/sec</Counter>
+</PerformanceCounterDataCollector>
+</DataCollectorSet>
