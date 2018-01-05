@@ -1,4 +1,5 @@
-<b>File Name: Test-SMB-Path.ps1</b><br>
+# Test Share/SMB availability
+File Name: Test-SMB-Path.ps1<br>
 Version: 1.0<br>
 Author: Rafael Carneiro Machado<br>
 E-Mail: rafaelcarneiromachado@gmail.com<br>
