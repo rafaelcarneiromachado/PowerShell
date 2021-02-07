@@ -10,7 +10,7 @@
 
 ----------------------
 
-> **If you just want to test/use the tool, you can just download the [THOTH.EXE](/THOTH.EXE) file**;
+> **If you just want to test/use the tool, you can just download the [THOTH.EXE](https://github.com/rafaelcarneiromachado/PowerShell/blob/master/THOTH/THOTH.exe) file**;
 > **If you want to read, understand, modify, customize and improve the code, keep reading;**
 
 ----------------------
@@ -45,7 +45,7 @@ Customizable items and their default values are:
 ### Notes:
 **When reviewing the code, press CTRL + M to EXPAND/COLLPASE the PS Regions. That will make it easier to understand the code structure.**
 
-* The [**THOTH-FORM.PS1**](bin/THOTH-FORM.PS1) has everything embedded, including the function [**INVOKE-THOTHSCAN.PS1**](bin/INVOKE-THOTHSCAN.PS1), which is the script that performs the actual scan;
+* The [**THOTH-FORM.PS1**](https://github.com/rafaelcarneiromachado/PowerShell/blob/master/THOTH/BIN/Thoth-Form.ps1) has everything embedded, including the function **INVOKE-THOTHSCAN.PS1**, which is the script that performs the actual scan;
 * I've put that way in order to make it easier to send just one single file to end users or to compile the PS script into an EXE file;
 * If you don't want to use the GUI, you can extract (copy/paste) the function code of INVOKE-THOTHSCAN and use it as a stand-alone PS function;
 
