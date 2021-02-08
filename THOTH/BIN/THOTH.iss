@@ -27,7 +27,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=C:\THOTH\
+OutputDir=C:\PSScripts\PowerShell\THOTH\
 OutputBaseFilename=THOTH
 Compression=lzma
 SolidCompression=yes
