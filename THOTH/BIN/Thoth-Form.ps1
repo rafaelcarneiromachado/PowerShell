@@ -1447,8 +1447,9 @@ $cssScript = @"
     Transcript -Section $section
 
     try {
-        $tempLogs = Get-EventLog -LogName Application -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"Application"}}, EventID, EntryType, Source, TimeGenerated, Message
-        $tempLogs += Get-EventLog -LogName System -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"System"}}, EventID, EntryType, Source, TimeGenerated, Message
+        $tempLogsApp = Get-EventLog -LogName Application -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"Application"}}, EventID, EntryType, Source, TimeGenerated, Message
+        $tempLogsSys = Get-EventLog -LogName System -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"System"}}, EventID, EntryType, Source, TimeGenerated, Message
+        $tempLogs = $tempLogsApp + $tempLogsSys
         $eventLogs = $tempLogs | Select-Object -Property `
             @{n='Log'; e={$_.Log}},
             @{n='Event ID'; e={$_.EventID}},
@@ -1496,8 +1497,8 @@ $cssScript = @"
         $section = "MDM Summary"
         Transcript -Section $section -SubHeader
     
-        $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority | Select-Object -ExpandProperty AuthorityName -ErrorAction Ignore
         New-Item -Path "$logFolder\MDM" -ItemType Directory | Out-Null
+        $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority -ErrorAction Ignore | Select-Object -ExpandProperty AuthorityName
         $mdmDiagParam = "-out $env:windir\Temp\LogCollector\MDM\"
         Start-Process "$env:windir\system32\MdmDiagnosticsTool.exe" -WindowStyle hidden $mdmDiagParam -verb runas -Wait
         $MDMDiagReportPath = Get-ChildItem "$env:windir\Temp\LogCollector\MDM\*.html" | Select-Object -ExpandProperty FullName -ErrorAction Ignore
