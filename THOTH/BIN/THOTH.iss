@@ -27,7 +27,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=C:\PSScripts\PowerShell\THOTH\
+OutputDir=D:\PSScripts\PowerShell\THOTH\
 OutputBaseFilename=THOTH
 Compression=lzma
 SolidCompression=yes
@@ -45,7 +45,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ButtonNext=&Run >
 
 [Files]
-Source: "C:\PSScripts\PowerShell\THOTH\BIN\Thoth-Form.ps1"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\PSScripts\PowerShell\THOTH\BIN\Thoth-Form.ps1"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Run]
