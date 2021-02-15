@@ -304,7 +304,7 @@ function Invoke-ThothScan {
             $script:preContent = '<button class="collapsible">' + $section + ':</button><div class="content">'
             $script:postContent = '</div>'
         }
-        $script:noData = '<p><font color="red">Unable to retrieve information</font></p>'
+        $script:noData = '<p><font color="red">Unable to retrieve information or data not available</font></p>'
     }
 
     function script:LicenseStatus {
@@ -987,12 +987,13 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Basic Info
-    $section = 'Basic Information'
+    $section = '1. Basic Information'
     Transcript -Section $section
 
     try {
         $wmiComputer = Get-WmiObject Win32_ComputerSystem
         $wmiOS = Get-WmiObject Win32_OperatingSystem
+        $domainJoined = (Get-WmiObject -Class Win32_ComputerSystem).PartOfDomain
         $wmiBios = Get-WmiObject Win32_Bios
         $cbsRebootPending = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction Ignore
         $wuRebootRequired = Test-Path -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'
@@ -1013,14 +1014,20 @@ tbody tr:nth-child(even) {background: #f0f0f2}
             @{n='OS'; e={$wmiOS.Caption}},
             @{n='OS Build'; e={$wmiOS.BuildNumber}},
             @{n='OS License Status'; e={LicenseStatus ; $script:licenseStatus}},
+            @{n='Domain/Workgroup'; e={if ($domainJoined) {"Domain: " + (Get-WmiObject Win32_ComputerSystem).Domain} else {"Workgroup: " + (Get-WmiObject -Class Win32_ComputerSystem).Workgroup}}},
             @{n='Current User'; e={$currentLoggedUser}},
-            @{n='Last Boot Time';e={Get-Date $bootTime.'Last Boot Time' -Format 'dd/MM/yyyy HH:mm:ss'}},
+            @{n='Current Date/Time'; e={Get-Date -Format 'dd/MM/yyyy HH:mm:ss'}},
+            @{n='Current Timezone'; e={[TimeZoneInfo]::Local.DisplayName}},
+            @{n='Last Boot Time';e={Get-Date $bootTime.'Last Boot Time' -Format 'dd/MM/yyyy HH:mm:ss'}}
+        $OSHTML = $OS | ConvertTo-Html -As Table -Fragment
+    
+        $pendingReboots = $wmiOS | Select-Object -Property `
             @{n='CBS - Reboot Pending'; e={If ($cbsRebootPending) {'True'} Else {'False'}}},
             @{n='Windows Update - Reboot Required'; e={$wuRebootRequired}},
             @{n='Pending Reboot for File Rename Operations'; e={If ($fileRenameRebootRequired) {'True'} Else {'False'}}}
-        $OSHTML = $OS | ConvertTo-Html -As Table -Fragment -PostContent $script:postContent
+        $pendingRebootsHTML = $pendingReboots | ConvertTo-Html -As Table -Fragment -PostContent $script:postContent
     
-        $basicInfoHTML = $basicHWHTML + $OSHTML
+        $basicInfoHTML = $basicHWHTML + $OSHTML + $pendingRebootsHTML
     } catch {
         Transcript -Section "Failed: $section `n$_"
     }
@@ -1028,7 +1035,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Local Users
-    $section = 'Local Users'
+    $section = '2. Local Users'
     Transcript -Section $section
 
     try {
@@ -1056,11 +1063,11 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Network Information
-    $section = 'Network Information'
+    $section = '3. Network Information'
     Transcript -Section $section
 
     try {
-        $section = 'Network Interfaces & IP Addresses'
+        $section = '3.1. Network Interfaces & IP Addresses'
         Transcript -Section $section -SubHeader
     
         $wmiOs = Get-WmiObject Win32_OperatingSystem
@@ -1094,7 +1101,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Wifi Information'
+        $section = '3.2. Wifi Information'
         Transcript -Section $section -SubHeader
     
         $netshWlanInterfaces = & "$env:windir\system32\netsh.exe" wlan show interfaces
@@ -1119,7 +1126,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Public IP Address and ISP Information'
+        $section = '3.3. Public IP Address and ISP Information'
         Transcript -Section $section -SubHeader
     
         Internet    
@@ -1140,7 +1147,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Internet Connection Speed and Ping Test'
+        $section = '3.4. Internet Connection Speed and Ping Test'
         Transcript -Section $section -SubHeader
     
         Internet
@@ -1175,7 +1182,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get CPU Info
-    $section = 'CPU Information'
+    $section = '4. CPU Information'
     Transcript -Section $section
 
     try {
@@ -1197,7 +1204,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Storage Info
-    $section = 'Storage Information'
+    $section = '5. Storage Information'
     Transcript -Section $section
 
     try {
@@ -1219,7 +1226,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Graphic Cards Info
-    $section = 'Graphics Information'
+    $section = '6. Graphics Information'
     Transcript -Section $section
 
     try {
@@ -1240,11 +1247,11 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Audio/Video Devices Info
-    $section = 'Audio/Video Devices'
+    $section = '7. Audio/Video Devices'
     Transcript -Section $section
 
     try {
-        $section = 'WebCameras'
+        $section = '7.1. WebCameras'
         Transcript -Section $section -SubHeader
 
         $webcam =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'camera') -or ($_.PNPClass -eq 'Image' -and $_.Name -like '*Camera*') -or ($_.PNPClass -eq 'Image' -and $_.Name -like '*Webcam*')} | Select-Object Name, Description, Manufacturer, Present, Status -Unique
@@ -1258,7 +1265,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Speakers'
+        $section = '7.2. Speakers'
         Transcript -Section $section -SubHeader
            
         $speakerDevice =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'audio*') -and ($_.Name -like '*Speaker*' -or $_.Name -like 'Remote Audio Device')}| Select-Object Name, Description, Manufacturer, Present, Status -Unique
@@ -1272,7 +1279,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Microphones'
+        $section = '7.3. Microphones'
         Transcript -Section $section -SubHeader
                         
         $micDevice =   Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'audio*') -and ($_.Name -like '*Microphone*'-or $_.Name -like 'Remote Audio Device')} | Select-Object Name, Description, Manufacturer, Present, Status -Unique
@@ -1289,7 +1296,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Plug & Play Devices
-    $section = 'Plug & Play Devices'
+    $section = '8. Plug & Play Devices'
     Transcript -Section $section
 
     try {
@@ -1309,7 +1316,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Driver Info
-    $section = 'Driver Information'
+    $section = '9. Driver Information'
     Transcript -Section $section
 
     try {
@@ -1339,7 +1346,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Services
-    $section = 'Services Statuses'
+    $section = '10. Services Statuses'
     Transcript -Section $section
     try {
         $services = Get-WmiObject win32_service | Select-Object DisplayName, Name, StartMode, State | Sort-Object StartMode, State, DisplayName
@@ -1351,7 +1358,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Group Policy Results Report
-    $section = 'Resultant Set of Policies (GPOs / GPResult)'
+    $section = '11. Resultant Set of Policies (GPOs / GPResult)'
     Transcript -Section $section
     try {
         $null = New-Item -Path "$logFolder\Windows" -ItemType Directory
@@ -1364,7 +1371,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Installed Software and Versions
-    $section = 'Installed Software and Versions'
+    $section = '12. Installed Software and Versions'
     Transcript -Section $section
 
     try {
@@ -1390,11 +1397,11 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Windows Update Status
-    $section = 'Windows Update Status'
+    $section = '13. Windows Update Status'
     Transcript -Section $section
 
     try {
-        $section = 'Hotfixes Installed'
+        $section = '13.1. Hotfixes Installed'
         Transcript -Section $section -SubHeader
     
         $kbs = Get-HotFix
@@ -1403,7 +1410,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
             $kb | Select-Object -Property `
             @{n='KB'; e={$kb.HotFixID}},
             @{n='KB Type'; e={$kb.Description}},
-            @{n='Installed On'; e={Get-Date $kb.installedon -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}} ,
+            @{n='Installed On'; e={if ($kb.InstalledOn) {Get-Date $kb.installedon -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern} else {""}}} ,
             @{n='Installed By'; e={$kb.InstalledBy}} | Sort-Object -Descending 'Installed On'
         }
         $hotFixesHTML = $hotFixes | ConvertTo-Html -As Table -Fragment -PreContent "$script:preContent $script:subHeader"
@@ -1412,7 +1419,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Pending Updates'
+        $section = '13.2. Pending Updates'
         Transcript -Section $section -SubHeader
 
         Internet
@@ -1422,17 +1429,17 @@ tbody tr:nth-child(even) {background: #f0f0f2}
             $searcher = $session.CreateUpdateSearcher()
             $searchResults = $searcher.Search('IsInstalled=0')
             if ($searchResults) {
-                if ($missingUpdates) {
-                    $missingUpdates = $searchResults.RootCategories | ForEach-Object {
-                        foreach ($update in $_.Updates) {
-                            $update | Select-Object -Property `
-                            @{n='KB'; e={[Regex]::Match($update.Title, '^.*\b(KB[0-9]+)\b.*$').Groups[1].Value}},
-                            @{n='Category'; e={$_.Name}},
-                            @{n='Title'; e={$update.Title}},
-                            @{n='Type'; e={$update.Type}},
-                            @{n='Downloaded'; e={$update.IsDownloaded}}
-                        }
+                $missingUpdates = $searchResults.RootCategories | ForEach-Object {
+                    foreach ($update in $_.Updates) {
+                        $update | Select-Object -Property `
+                        @{n='KB'; e={[Regex]::Match($update.Title, '^.*\b(KB[0-9]+)\b.*$').Groups[1].Value}},
+                        @{n='Category'; e={$_.Name}},
+                        @{n='Title'; e={$update.Title}},
+                        @{n='Type'; e={$update.Type}},
+                        @{n='Downloaded'; e={$update.IsDownloaded}}
                     }
+                }
+                if ($missingUpdates) {
                     $missingUpdatesHTML = $missingUpdates | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
                 } else {
                     $missingUpdatesHTML = $script:subHeader + '<p>No Updates Missing</p>' + $script:postContent
@@ -1451,7 +1458,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Event Viewers Alerts Since Last Boot Time
-    $section = 'Event Viewers Alerts Since Last Boot Time'
+    $section = '14. Event Viewers Alerts Since Last Boot Time'
     Transcript -Section $section
 
     try {
@@ -1473,7 +1480,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get Performance Report
-    $section = 'Performance Report'
+    $section = '15. Performance Report'
     Transcript -Section $section
 
     try {
@@ -1498,12 +1505,12 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Get MDM Information
-    $section = 'MDM Information'
+    $section = '16. MDM Information'
     Transcript -Section $section
 
     try {
     
-        $section = 'MDM Summary'
+        $section = '16.1. MDM Summary'
         Transcript -Section $section -SubHeader
         $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority -ErrorAction Ignore | Select-Object -ExpandProperty AuthorityName
         if ($MDMServer) {
@@ -1524,7 +1531,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
             }
             $MDMDiagReportHTML = $MDMSummary | ConvertTo-Html -As List -Fragment -PreContent "$script:preContent $script:subHeader"
 
-            $section = 'MDM Alerts'
+            $section = '16.2. MDM Alerts'
             Transcript -Section $section -SubHeader
             
             if (Test-Path -Path "$env:windir\Temp\LogCollector\MDM\DeviceManagement-Enterprise-Diagnostics-Provider.evtx") {
@@ -1642,11 +1649,11 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
     #-------------------------------------------------------------------------------------------
     #region Compile a List of Logs Collected
-    $section = 'List of Logs Collected'
+    $section = '17. List of Logs Collected'
     Transcript -Section $section
 
     try {
-        $section = 'Logs Available Offline'
+        $section = '17.1. Logs Available Offline'
         Transcript -Section $section -SubHeader
     
         $otherLogs = New-Object PSObject
@@ -1660,7 +1667,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     }
 
     try {
-        $section = 'Full Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
+        $section = '17.2. Full Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
         Transcript -Section $section -SubHeader
         $fullDumpPath = "$env:SystemRoot\*.dmp"
         If (Test-Path $fullDumpPath) {
@@ -1670,7 +1677,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
             $memoryDumpHTML = $script:subHeader + '<p>No Full Memory Dump Stored</p>'
         }
 
-        $section = 'Mini Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
+        $section = '17.3. Mini Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
         Transcript -Section $section -SubHeader
         $miniDumpPath = "$env:SystemRoot\minidump\*.dmp"
         If (Test-Path $miniDumpPath) {
