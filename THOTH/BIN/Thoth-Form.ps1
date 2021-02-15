@@ -1039,7 +1039,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
     Transcript -Section $section
 
     try {
-        $wmiAdministrators = (Get-LocalGroupMember -Name 'Administrators').Name | ForEach-Object {(($_) -split '\\')[1]}
+        $wmiAdministrators = Get-CimInstance Win32_Group -filter "Name='Administrators'"  | Get-CimAssociatedInstance | Where-Object {$_.LocalAccount -eq $true} | Select-Object -ExpandProperty Name
         $wmiLocalUsers = Get-WmiObject Win32_UserAccount -Filter "Domain = '$env:computername'" | Where-Object {$_.Name -ne 'WDAGUtilityAccount'}
     
         $localUsers = foreach ($wmiLocalUser in $wmiLocalUsers) {
@@ -1514,7 +1514,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
         Transcript -Section $section -SubHeader
         $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority -ErrorAction Ignore | Select-Object -ExpandProperty AuthorityName
         if ($MDMServer) {
-            $mdmDiagParam = "-out $env:windir\Temp\LogCollector\MDM"
+            $mdmDiagParam = "-out $env:windir\Temp\LogCollector\MDM\"
             Start-Process "$env:windir\system32\MdmDiagnosticsTool.exe" -WindowStyle hidden $mdmDiagParam -verb runas -Wait
             $MDMDiagFiles = Get-ChildItem "$env:windir\Temp\LogCollector\MDM" -ErrorAction Ignore
             if ($MDMDiagFiles) {
