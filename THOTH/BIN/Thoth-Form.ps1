@@ -62,19 +62,19 @@
 
 #-------------------------------------------------------------------------------------------
 # CUSTOMIZATION / BRANDING: Here you can change the following values in order to customize the look & feel of the tool:
-$mainTitle = "THOTH"                                                         # Main Title
-$logoFile = "C:\Example\Logo.png"                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
-$footer = "Created by Rafael Machado (rafaelcarneiromachado@gmail.com)"      # Information placed at the end of the HTML Report
-$backgroundColor = "#3B3B3B"                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
-$foregroundColor = "#FFFFFF"                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
-$itDept = "your IT Department"
-$email = "support@yourITdepartment.com"
+$mainTitle = 'THOTH'                                                         # Main Title
+$logoFile = 'C:\Example\Logo.png'                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
+$footer = 'Created by Rafael Machado (rafaelcarneiromachado@gmail.com)'      # Information placed at the end of the HTML Report
+$backgroundColor = '#3B3B3B'                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
+$foregroundColor = '#FFFFFF'                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
+$itDept = 'your IT Department'
+$email = 'support@yourITdepartment.com'
 #-------------------------------------------------------------------------------------------
 
 
 #----DO NOT CHANGE ANYTHING FROM THIS POINT ONWARDS, UNLESS YOU KNOW WHAT YOU ARE DOING ----
 $Invocation = (Get-Variable MyInvocation -Scope 0).Value
-$global:defaultPath = Split-Path $Invocation.MyCommand.Path
+$script:defaultPath = Split-Path $Invocation.MyCommand.Path
 
 #-------------------------------------------------------------------------------------------
 #region FORM: Check if running as Administrator
@@ -82,15 +82,15 @@ $global:defaultPath = Split-Path $Invocation.MyCommand.Path
 $nonAdminPopup = New-Object -ComObject Wscript.Shell -ErrorAction Stop
 $nonAdminMessage = "Looks like the tool is not running with local administrator privileges:`n`n`n1. If you are using a corporate computer, please contact your IT Department;`n`n2. If you are using a personal computer, make sure you run the EXE file as Administrator (Locate the EXE file, with your mouse pointer, RIGHT CLICK over it and select RUN AS ADMINISTRATOR)"
 Try {
-    $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $myWindowsID=[Security.Principal.WindowsIdentity]::GetCurrent()
     $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
-    $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
+    $adminRole=[Security.Principal.WindowsBuiltInRole]::Administrator
     If (-not $myWindowsPrincipal.IsInRole($adminRole)) {
-        $nonAdminPopup.Popup($nonAdminMessage,0,"Attention",0+48)
+        $nonAdminPopup.Popup($nonAdminMessage,0,'Attention',0+48)
         Return
     }
 } Catch {
-    $nonAdminPopup.Popup($nonAdminMessage,0,"Attention",0+48)
+    $nonAdminPopup.Popup($nonAdminMessage,0,'Attention',0+48)
     Return
 }
 #endregion
@@ -98,43 +98,44 @@ Try {
 #-------------------------------------------------------------------------------------------
 #region FORM: Functions
 
-function Run {
+function script:Run {
+    Add-Type -AssemblyName System.Windows.Forms
     $script:abort = $false
     $buttonRun.Hide()
     $buttonQuit.Hide()
     $buttonAbort.Show()
     $logOutput.Show()
     $progressBar.Show()
-    $h3.Text = "Processing ..."
+    $h3.Text = 'Processing ...'
     $h3.ForeColor = 'Red'
     $h3.Location = '7,135'
     $progressBar.Visible = $True
 
-    $global:processRunspace =[runspacefactory]::CreateRunspace()
-    $global:processRunspace.ApartmentState = "STA"
-    $global:processRunspace.ThreadOptions = "ReuseThread"          
-    $global:processRunspace.Open()
-    $global:processRunspace.SessionStateProxy.SetVariable("logOutput",$logOutput)
-    $global:processRunspace.SessionStateProxy.SetVariable("defaultPath",$global:defaultPath)
-    $global:processRunspace.SessionStateProxy.SetVariable("mainTitle",$mainTitle)
-    $global:processRunspace.SessionStateProxy.SetVariable("logoFile",$logoFile)
-    $global:processRunspace.SessionStateProxy.SetVariable("footer",$footer)
-    $global:processRunspace.SessionStateProxy.SetVariable("backgroundColor",$backgroundColor)
-    $global:processRunspace.SessionStateProxy.SetVariable("foregroundColor",$foregroundColor)
+    $script:processRunspace =[runspacefactory]::CreateRunspace()
+    $script:processRunspace.ApartmentState = 'STA'
+    $script:processRunspace.ThreadOptions = 'ReuseThread'          
+    $script:processRunspace.Open()
+    $script:processRunspace.SessionStateProxy.SetVariable('logOutput',$logOutput)
+    $script:processRunspace.SessionStateProxy.SetVariable('defaultPath',$script:defaultPath)
+    $script:processRunspace.SessionStateProxy.SetVariable('mainTitle',$mainTitle)
+    $script:processRunspace.SessionStateProxy.SetVariable('logoFile',$logoFile)
+    $script:processRunspace.SessionStateProxy.SetVariable('footer',$footer)
+    $script:processRunspace.SessionStateProxy.SetVariable('backgroundColor',$backgroundColor)
+    $script:processRunspace.SessionStateProxy.SetVariable('foregroundColor',$foregroundColor)
     try {
-        $global:mainScript = Get-Content function:\Invoke-ThothScan
-        $global:psCmd = [PowerShell]::Create().AddScript($global:mainScript)
-        $global:psCmd.Runspace = $global:processRunspace 
-        $handle = $global:psCmd.BeginInvoke()
+        $script:mainScript = Get-Content function:\Invoke-ThothScan
+        $script:psCmd = [PowerShell]::Create().AddScript($script:mainScript)
+        $script:psCmd.Runspace = $script:processRunspace 
+        $handle = $script:psCmd.BeginInvoke()
         do {
-            [System.Windows.Forms.Application]::DoEvents()
+            [Windows.Forms.Application]::DoEvents()
         } until ($handle.IsCompleted)
-        $global:processRunspace.Close() | Out-Null
-        $global:processRunspace.Dispose() | Out-Null
-        $global:psCmd.Stop() | Out-Null
-        $global:psCmd.Dispose() | Out-Null
+        $null = $script:processRunspace.Close()
+        $null = $script:processRunspace.Dispose()
+        $null = $script:psCmd.Stop()
+        $null = $script:psCmd.Dispose()
     } catch {
-        $message = "Error while executing Invoke-ThothScan.ps1: $_"
+        $message = ('Error while executing Invoke-ThothScan.ps1: {0}' -f $_)
         Write-Host $message
         $logOutput.AppendText($message)
     }
@@ -143,7 +144,7 @@ function Run {
         $progressBar.Hide()
         $h3.Location = '170,180'
         $h3.ForeColor = 'Orange'
-        $h3.Text = "Process Aborted"
+        $h3.Text = 'Process Aborted'
         $buttonAbort.Hide()
         $buttonQuit.Show()
         $buttonRun.Show()
@@ -153,7 +154,7 @@ function Run {
         $progressBar.Hide()
         $h3.Location = '170,180'
         $h3.ForeColor = 'Green'
-        $h3.Text = "Process Completed"
+        $h3.Text = 'Process Completed'
         $buttonAbort.Hide()
         $buttonQuit.Location = '170,400'
         $buttonQuit.Show()
@@ -164,9 +165,9 @@ function Run {
             $lastReport = "$lastReportFolder\$lastReportName"
             $zipFile = Get-ChildItem -Path $LastReportFolder -Name *.zip
             $finalMessage = "Please, send the file $zipFile to $itDept via: $email`r`n`r`nMind the file size as it may be bigger than the limit allowed by your e-mail policies"
-            [System.Windows.Forms.MessageBox]::Show($finalMessage,'Process Completed','OK','Information')
-            Start $lastReport
-            Explorer $script:lastReportFolder
+            [Windows.Forms.MessageBox]::Show($finalMessage,'Process Completed','OK','Information')
+            Start-Process $lastReport
+            & "$env:windir\explorer.exe" $script:lastReportFolder
         } catch {
             $message = "Error on the last steps of the process: $_"
             Write-Host $message
@@ -175,11 +176,11 @@ function Run {
     }
 }
 
-function Abort {
+function script:Abort {
     $script:abort = $True
-    $global:processRunspace.Close()
-    $global:psCmd.Stop()
-    $global:psCmd.Dispose()
+    $script:processRunspace.Close()
+    $script:psCmd.Stop()
+    $script:psCmd.Dispose()
     $logOutput.AppendText("`r`nProcess aborted by the user")
 }
 
@@ -246,11 +247,11 @@ function Invoke-ThothScan {
 
     #-------------------------------------------------------------------------------------------
     # CUSTOMIZATION / BRANDING: Here you can change the following values in order to customize the look & feel of the tool:
-    $mainTitle = "THOTH"                                                         # Main Title
-    $logoFile = "C:\Example\Logo.png"                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
-    $footer = "Created by Rafael Machado (rafaelcarneiromachado@gmail.com)"      # Information placed at the end of the HTML Report
-    $backgroundColor = "#3B3B3B"                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
-    $foregroundColor = "#FFFFFF"                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
+    $mainTitle = 'THOTH'                                                         # Main Title
+    $logoFile = 'C:\Example\Logo.png'                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
+    $footer = 'Created by Rafael Machado (rafaelcarneiromachado@gmail.com)'      # Information placed at the end of the HTML Report
+    $backgroundColor = '#3B3B3B'                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
+    $foregroundColor = '#FFFFFF'                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
     #-------------------------------------------------------------------------------------------
 
     }
@@ -264,11 +265,11 @@ function Invoke-ThothScan {
     #-------------------------------------------------------------------------------------------
     #region FORM: Check if running as Administrator
 
-    $nonAdminMessage = "You must run the script AS ADMINISTRATOR!"
+    $nonAdminMessage = 'You must run the script AS ADMINISTRATOR!'
     try {
-        $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
+        $myWindowsID=[Security.Principal.WindowsIdentity]::GetCurrent()
         $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
-        $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
+        $adminRole=[Security.Principal.WindowsBuiltInRole]::Administrator
         If (-not $myWindowsPrincipal.IsInRole($adminRole)) {
             Write-Host $nonAdminMessage
             Return
@@ -283,12 +284,12 @@ function Invoke-ThothScan {
     #region Define Helper Functions
 
     function Get-TimeStamp {
-        return "[{0:dd/MM/yyyy} {0:HH:mm:ss}]" -f (Get-Date)
+        return '[{0:dd/MM/yyyy} {0:HH:mm:ss}]' -f (Get-Date)
     }
     
-    function Transcript {
-        Param ($Section,[switch]$SubHeader)
-        $message = ""
+    function script:Transcript {
+        Param ([Parameter(Mandatory=$true)]$Section,[switch]$SubHeader)
+        $message = ''
         $message = "$(Get-TimeStamp) $Section"
         if (Get-Variable logOutput -ErrorAction SilentlyContinue) {
             $logOutput.AppendText("`r`n$message")
@@ -306,46 +307,46 @@ function Invoke-ThothScan {
         $script:noData = '<p><font color="red">Unable to retrieve information</font></p>'
     }
 
-    function LicenseStatus {
-        $script:licenseStatus = ""
+    function script:LicenseStatus {
+        $script:licenseStatus = ''
         try {
             $wpa = Get-WmiObject SoftwareLicensingProduct -Filter "ApplicationID = '55c92734-d682-4d71-983e-d6ec3f16059f'" -Property LicenseStatus -ErrorAction Ignore
         } catch {
-            $script:licenseStatus = "Unable to Identify" 
+            $script:licenseStatus = 'Unable to Identify' 
         }
 
         if ($wpa) {
             :outer foreach ($item in $wpa) {
                 switch ($item.LicenseStatus) {
-                    0 {$script:licenseStatus = "Unlicensed"}
-                    1 {$script:licenseStatus = "Licensed"; break outer}
-                    2 {$script:licenseStatus = "Out-Of-Box Grace Period"; break outer}
-                    3 {$script:licenseStatus = "Out-Of-Tolerance Grace Period"; break outer}
-                    4 {$script:licenseStatus = "Non-Genuine Grace Period"; break outer}
-                    5 {$script:licenseStatus = "Notification"; break outer}
-                    6 {$script:licenseStatus = "Extended Grace"; break outer}
+                    0 {$script:licenseStatus = 'Unlicensed'}
+                    1 {$script:licenseStatus = 'Licensed'; break outer}
+                    2 {$script:licenseStatus = 'Out-Of-Box Grace Period'; break outer}
+                    3 {$script:licenseStatus = 'Out-Of-Tolerance Grace Period'; break outer}
+                    4 {$script:licenseStatus = 'Non-Genuine Grace Period'; break outer}
+                    5 {$script:licenseStatus = 'Notification'; break outer}
+                    6 {$script:licenseStatus = 'Extended Grace'; break outer}
                 }
             }
         } else {
-            $licenseStatus = "Unable to Identify"
+            $licenseStatus = 'Unable to Identify'
         }
     }
 
-    function Hyperlink {
-        Param ($linkPath)
-        $script:htmlLink = "START" + $linkPath + "MIDDLE" + $linkPath + "END"
+    function script:Hyperlink {
+        Param ([Parameter(Mandatory=$true)]$linkPath)
+        $script:htmlLink = 'START' + $linkPath + 'MIDDLE' + $linkPath + 'END'
     }
 
-    function Internet {
+    function script:Internet {
         $internetCheck = 0
         $netProfiles = Get-NetConnectionProfile
         foreach ($netProfile in $netProfiles) {
-            $netCount = if ($netProfiles.IPv4Connectivity -eq "Internet") {1} else {0}
+            $netCount = if ($netProfiles.IPv4Connectivity -eq 'Internet') {1} else {0}
             $internetCheck = $internetCheck + $netCount
         }
         if ($internetCheck -gt 0) {
-            $internetFirstCheck = $True
-            $internetSecondCheck = if ((Invoke-RestMethod -Uri 'http://ip-api.com/json').status -eq "success") {$True} Else {$False}
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $internetSecondCheck = if ((Invoke-RestMethod -Uri 'http://ip-api.com/json').status -eq 'success') {$True} Else {$False}
             if ($internetSecondCheck) {
                 $script:internet = $True
             } else {
@@ -356,21 +357,20 @@ function Invoke-ThothScan {
         }
     }
 
-    Function DownloadSpeed { 
-        Param ($url)
-        $downloadSpeed = ""
+    Function script:DownloadSpeed { 
+        Param ([Parameter(Mandatory=$true)]$url)
+        $downloadSpeed = ''
         try {
             $col = new-object System.Collections.Specialized.NameValueCollection 
             $wc = new-object system.net.WebClient 
             $wc.QueryString = $col 
             $downloadElaspedTime = (measure-command {$webpage1 = $wc.DownloadData($url)}).totalmilliseconds
-            $string = [System.Text.Encoding]::ASCII.GetString($webpage1)
             $downSize = ($webpage1.length + $webpage2.length) / 1Mb
             $downloadSize = [Math]::Round($downSize, 2)
             $downloadTimeSec = $downloadElaspedTime * 0.001
             $downSpeed = ($downloadSize / $downloadTimeSec) * 8
             $downloadSpeed = [Math]::Round($downSpeed, 2)
-            if ($downloadSpeed -match "^[\d\.]+$") {
+            if ($downloadSpeed -match '^[\d\.]+$') {
                 $downloadSpeed
             } else {
                 $downloadSpeed = $null
@@ -382,12 +382,12 @@ function Invoke-ThothScan {
         }
     }
 
-    Function Ping {
-        Param ($pingServer)
-        $ping = ""
+    Function script:Ping {
+        Param ([Parameter(Mandatory=$true)]$pingServer)
+        $pingResult = ''
         try {
             $pingResult = (Get-CimInstance -ClassName Win32_PingStatus -Filter "Address='$pingServer'").ResponseTime
-            if ($pingResult -match "^[\d\.]+$") {
+            if ($pingResult -match '^[\d\.]+$') {
                 $pingResult
             } else {
                 $pingResult = $null
@@ -404,8 +404,8 @@ function Invoke-ThothScan {
     #region Preparing the environment
     
     #Prepare Folders and Timestamps
-    $culture = New-Object system.globalization.cultureinfo(“en-GB”)
-    $currentDate = Get-Date -format ($culture.DateTimeFormat.ShortDatePattern)
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $culture = New-Object system.globalization.cultureinfo('en-GB')
     $currentDateTime = Get-Date -format 'yyyy-MM-ddTHH.mm.ss'
     $bootTime = Get-WmiObject -class Win32_OperatingSystem | Select-Object @{n='Last Boot Time';e={Get-Date($_.ConvertToDateTime($_.LastBootUpTime))}}
     $bootTimestampMinus2hours = (Get-Date -Date $bootTime.'Last Boot Time').AddHours(-2)
@@ -414,22 +414,22 @@ function Invoke-ThothScan {
     $rootPath = "$env:SystemDrive\LogCollector\$currentDateTime"
 
     #Start Transcript
-    $section = "Preparing the environment"
+    $section = 'Preparing the environment'
     Start-Transcript -Path "$rootPath\0.LogCollector_ExecutionLog.log" -Force
     Transcript -Section $section
 
-    $tempFiles = New-Item -ItemType Directory "$env:windir\Temp\LogCollector" -Force
-    New-Item -path $rootPath -type Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name | Out-Null
+    New-Item -ItemType Directory "$env:windir\Temp\LogCollector" -Force
+    $null = New-Item -Path $rootPath -ItemType Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name
     $logFolder = "$rootPath\LogFiles"
-    New-Item -path $logFolder -type Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name | Out-Null
+    $null = New-Item -Path $logFolder -ItemType Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name
     $perfFolder = "$rootPath\Performance"
-    New-Item -path $perfFolder -type Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name | Out-Null
+    $null = New-Item -Path $perfFolder -ItemType Directory -ErrorAction Ignore | Select-Object -ExpandProperty Name
     try {
-        $currentLoggedUser = ((quser) -replace '^>', '') -replace '\s{2,}', ',' | ConvertFrom-Csv | Where-Object {$_.state -eq "Active"} | Select-Object -ExpandProperty username
+        $currentLoggedUser = ((& "$env:windir\system32\quser.exe") -replace '^>', '') -replace '\s{2,}', ',' | ConvertFrom-Csv | Where-Object {$_.state -eq 'Active'} | Select-Object -ExpandProperty username
     } catch {
         $currentLoggedUser = $script:noData
     }
-$perfXML = @"
+  $perfXML = @'
 <?xml version="1.0" encoding="UTF-16"?>
 <DataCollectorSet>
 <Status>0</Status>
@@ -717,12 +717,12 @@ $perfXML = @"
 	</OBJECT>
 </Value>
 </DataCollectorSet>
-"@
+'@
     
     #Internet Speed Test Variables
     $minimumDownloadSpeed = 10
     $minimumPing = 230
-    $urlDownload = "https://file-examples-com.github.io/uploads/2017/02/zip_10MB.zip"
+    $urlDownload = 'https://file-examples-com.github.io/uploads/2017/02/zip_10MB.zip'
     $serverSA = 'ftp.br.debian.org'
     $serverNA = 'ftp.us.debian.org'
     $serverEU = 'ftp.uk.debian.org'
@@ -731,9 +731,9 @@ $perfXML = @"
     $serverAF = 'ftp.is.co.za'
 
     #Branding/Customization
-    $section = "Branding & Customization"
+    $section = 'Branding & Customization'
     Transcript -Section $section
-$defaultLogo = @"
+  $defaultLogo = @'
 iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAFcASURBVHhe7b0HmCRneS18qrqqOueevDOzO5u0K2lXWQgh
 EEIiBxFkwASTjAPGGLDNc/kdZGO4XK5tTLINl2AbGbBkwPiSLwZhggBJKOyuNs9O2EmdU3VXV/zPWzPc35gkYUng3/1K/fROp6r6vvOd95wvFYYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEM
 YxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCG8VOHsvU8jJ9B3Hgj1G/ftEtPXXjKveUWeFsvh3HTTe/MjI3NXlXvWucOHH8tcPyz9548eWjpyJHGLbfc8n2f/XmMIbAe
@@ -919,8 +919,8 @@ ghFKiFDgDhMJQIQIiXUQbK5bDhDVFBBZpK0Il0YGt8LOzYEDBTp8h3ZyENAJ1t9S+VKN4csJJWFK9IBS
 W5C6z639NC5wurxfTM3mmvaRTbeqfbtSCR/zOW25+06233vcjf/uHxRBYPyZ+4ZZbvLXy7a8dHx+9fXpk5w8tWOohU/FVbzAYuAQU85IiPQGuH5BrPJdm3XcThu4WCwVXjWiurkVdw4i5Ki2apuuuqhuuI93Yqu5G9D
 jfN1yFv0FQubbtuQOPxp5/y++5QeDafsS1XNV1FY0GUXF1XePvqW5Ei7hkyR9Z+U964tOZaZP9mJEMXeNvvOkT7zi+uj5t+7HdJ84OXtvzlbu1RPSrudLMl1bLypu+8Pn5Sz7/wbue/dYP3PpT3QhzGMMYxjCGMYxh
 DGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxh/FcJ4P8F9ulnpiNaaZEAAAAASUVORK5CYII=
-"@
-$cssStyles = @"
+'@
+  $cssStyles = @"
 <style>
 
 html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
@@ -953,7 +953,7 @@ tbody tr:nth-child(even) {background: #f0f0f2}
 
 </style>
 "@
-$cssScript = @"
+  $cssScript = @'
 <script>
     var coll = document.getElementsByClassName("collapsible");
     var i;
@@ -968,15 +968,15 @@ $cssScript = @"
         });
     }
 </script>
-"@
+'@
     $customLogo = $logoFile
     if (Test-Path $customLogo) {
         $logoBase64 = [convert]::ToBase64String((get-content $customLogo -encoding byte))
     } else {
         $logoBase64 = $defaultLogo
     }
-    $customHexMainBackColor = $backgroundColor + ";"
-    $customHexMainFontColor = $foregroundColor + ";"
+    $customHexMainBackColor = $backgroundColor + ';'
+    $customHexMainFontColor = $foregroundColor + ';'
     $cssStyles = $cssStyles -replace 'HexMainBackColor',$customHexMainBackColor
     $cssStyles = $cssStyles -replace 'HexMainFontColor',$customHexMainFontColor
     $header1 = '<header class="headerContainer"><div class="Image"><img src="data:image/png;base64, ' + $logoBase64
@@ -987,7 +987,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Basic Info
-    $section = "Basic Information"
+    $section = 'Basic Information'
     Transcript -Section $section
 
     try {
@@ -995,7 +995,7 @@ $cssScript = @"
         $wmiOS = Get-WmiObject Win32_OperatingSystem
         $wmiBios = Get-WmiObject Win32_Bios
         $cbsRebootPending = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction Ignore
-        $wuRebootRequired = Test-Path -Path "HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired"
+        $wuRebootRequired = Test-Path -Path 'HKLM:\\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'
         $fileRenameRebootRequired = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction Ignore
     
         $basicHW = $wmiComputer | Select-Object -Property `
@@ -1015,9 +1015,9 @@ $cssScript = @"
             @{n='OS License Status'; e={LicenseStatus ; $script:licenseStatus}},
             @{n='Current User'; e={$currentLoggedUser}},
             @{n='Last Boot Time';e={Get-Date $bootTime.'Last Boot Time' -Format 'dd/MM/yyyy HH:mm:ss'}},
-            @{n='CBS - Reboot Pending'; e={If ($cbsRebootPending) {"True"} Else {"False"}}},
+            @{n='CBS - Reboot Pending'; e={If ($cbsRebootPending) {'True'} Else {'False'}}},
             @{n='Windows Update - Reboot Required'; e={$wuRebootRequired}},
-            @{n='Pending Reboot for File Rename Operations'; e={If ($fileRenameRebootRequired) {"True"} Else {"False"}}}
+            @{n='Pending Reboot for File Rename Operations'; e={If ($fileRenameRebootRequired) {'True'} Else {'False'}}}
         $OSHTML = $OS | ConvertTo-Html -As Table -Fragment -PostContent $script:postContent
     
         $basicInfoHTML = $basicHWHTML + $OSHTML
@@ -1028,11 +1028,11 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Local Users
-    $section = "Local Users"
+    $section = 'Local Users'
     Transcript -Section $section
 
     try {
-        $wmiAdministrators = (Get-LocalGroupMember -Name "Administrators").Name | ForEach-Object {(($_) -split '\\')[1]}
+        $wmiAdministrators = (Get-LocalGroupMember -Name 'Administrators').Name | ForEach-Object {(($_) -split '\\')[1]}
         $wmiLocalUsers = Get-WmiObject Win32_UserAccount -Filter "Domain = '$env:computername'" | Where-Object {$_.Name -ne 'WDAGUtilityAccount'}
     
         $localUsers = foreach ($wmiLocalUser in $wmiLocalUsers) {
@@ -1041,11 +1041,11 @@ $cssScript = @"
             @{n='Full Name'; e={$wmiLocalUser.FullName}},
             @{n='Description'; e={$wmiLocalUser.Description}},
             @{n='Domain'; e={$wmiLocalUser.Domain}},
-            @{n='Account Status'; e={if ($wmiLocalUser.Disabled) {"Disabled"} else {"Enabled"}}},
+            @{n='Account Status'; e={if ($wmiLocalUser.Disabled) {'Disabled'} else {'Enabled'}}},
             @{n='Account Lockout'; e={$wmiLocalUser.Lockout}},
             @{n='User Can Change Password'; e={$wmiLocalUser.PasswordChangeable}},
             @{n='Password Expires'; e={$wmiLocalUser.PasswordExpires}},
-            @{n='Local Administrator'; e={If ($wmiAdministrators -contains $wmiLocalUser.Name) {"Yes"} Else {"No"}}}
+            @{n='Local Administrator'; e={If ($wmiAdministrators -contains $wmiLocalUser.Name) {'Yes'} Else {'No'}}}
         }
     
         $localUsersHTML = $localUsers | ConvertTo-Html -As Table -Fragment -PreContent $script:preContent -PostContent $script:postContent
@@ -1056,15 +1056,15 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Network Information
-    $section = "Network Information"
+    $section = 'Network Information'
     Transcript -Section $section
 
     try {
-        $section = "Network Interfaces & IP Addresses"
+        $section = 'Network Interfaces & IP Addresses'
         Transcript -Section $section -SubHeader
     
         $wmiOs = Get-WmiObject Win32_OperatingSystem
-        $netAdapters = Get-NetAdapter | Where-Object {$_.Status -ne "Not Present" -and $_.Virtual -ne "True"}
+        $netAdapters = Get-NetAdapter | Where-Object {$_.Status -ne 'Not Present' -and $_.Virtual -ne 'True'}
         $netIPConfig = Get-NetIPConfiguration | Select-Object -ExpandProperty IPv4Address
         $wmiNetAdapterConfig = Get-WmiObject Win32_NetworkAdapterConfiguration
         $netProfile = Get-NetConnectionProfile
@@ -1076,11 +1076,11 @@ $cssScript = @"
             @{n='NIC Status'; e={$netAdapter.Status}},
             @{n='Media Type'; e={$netAdapter.MediaType}},
             @{n='MAC Address'; e={$netAdapter.MacAddress}},
-            @{n='IPv4'; e={($netIPConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty IPAddress) -join ", "}},
+            @{n='IPv4'; e={($netIPConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty IPAddress) -join ', '}},
             @{n='Subnet'; e={$wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty IPSubnet | Select-Object -First 1}},
-            @{n='DNS Servers'; e={($wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DNSServerSearchOrder) -join ", "}},
+            @{n='DNS Servers'; e={($wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DNSServerSearchOrder) -join ', '}},
             @{n='DNS Domain'; e={$wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DNSDomain}},
-            @{n='DNS Suffixes'; e={($wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DNSDomainSuffixSearchOrder) -join ", "}},
+            @{n='DNS Suffixes'; e={($wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DNSDomainSuffixSearchOrder) -join ', '}},
             @{n='Gateway'; e={$wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DefaultIPGateway | Select-Object -First 1}},
             @{n='DHCP Enabled'; e={$wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DHCPEnabled}},
             @{n='DHCP Server'; e={$wmiNetAdapterConfig | Where-Object {$_.InterfaceIndex -eq $netAdapter.InterfaceIndex} | Select-Object -ExpandProperty DHCPServer}},
@@ -1094,21 +1094,21 @@ $cssScript = @"
     }
 
     try {
-        $section = "Wifi Information"
+        $section = 'Wifi Information'
         Transcript -Section $section -SubHeader
     
-        $netshWlanInterfaces = netsh wlan show interfaces
+        $netshWlanInterfaces = & "$env:windir\system32\netsh.exe" wlan show interfaces
 
         $wifi = $netshWlanInterfaces | Select-Object -First 1 -Property `
-            @{n='Interface Name'; e={(($netshWlanInterfaces | Select-String -Pattern 'Name') -split ": ")[1]}},
-            @{n='SSID'; e={(($netshWlanInterfaces | Select-String -Pattern 'SSID') -split ": ")[1]}},
-            @{n='State'; e={$tmpString = (($netshWlanInterfaces | Select-String -Pattern 'State') -split ": ")[1] ; (Get-Culture).TextInfo.ToTitleCase($tmpString)}},
-            @{n='Wifi Signal'; e={(($netshWlanInterfaces | Select-String -Pattern 'Signal') -split ": ")[1]}},
-            @{n='Network Type'; e={(($netshWlanInterfaces | Select-String -Pattern 'Network Type') -split ": ")[1]}},
-            @{n='Radio Type'; e={(($netshWlanInterfaces | Select-String -Pattern 'Radio Type') -split ": ")[1]}},
-            @{n='Authentication'; e={(($netshWlanInterfaces | Select-String -Pattern 'Authentication') -split ": ")[1]}},
-            @{n='Receive Rate (Mbps)'; e={(($netshWlanInterfaces | Select-String -Pattern 'Receive rate \(Mbps\)') -split ": ")[1]}},
-            @{n='Transmit Rate (Mbps)'; e={(($netshWlanInterfaces | Select-String -Pattern 'Transmit rate \(Mbps\)') -split ": ")[1]}}
+            @{n='Interface Name'; e={(($netshWlanInterfaces | Select-String -Pattern 'Name') -split ': ')[1]}},
+            @{n='SSID'; e={(($netshWlanInterfaces | Select-String -Pattern 'SSID') -split ': ')[1]}},
+            @{n='State'; e={$tmpString = (($netshWlanInterfaces | Select-String -Pattern 'State') -split ': ')[1] ; (Get-Culture).TextInfo.ToTitleCase($tmpString)}},
+            @{n='Wifi Signal'; e={(($netshWlanInterfaces | Select-String -Pattern 'Signal') -split ': ')[1]}},
+            @{n='Network Type'; e={(($netshWlanInterfaces | Select-String -Pattern 'Network Type') -split ': ')[1]}},
+            @{n='Radio Type'; e={(($netshWlanInterfaces | Select-String -Pattern 'Radio Type') -split ': ')[1]}},
+            @{n='Authentication'; e={(($netshWlanInterfaces | Select-String -Pattern 'Authentication') -split ': ')[1]}},
+            @{n='Receive Rate (Mbps)'; e={(($netshWlanInterfaces | Select-String -Pattern 'Receive rate \(Mbps\)') -split ': ')[1]}},
+            @{n='Transmit Rate (Mbps)'; e={(($netshWlanInterfaces | Select-String -Pattern 'Transmit rate \(Mbps\)') -split ': ')[1]}}
         if ($wifi.'Interface Name' -ne $null) {
             $wifiHTML = $wifi | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader
         } else {
@@ -1119,7 +1119,7 @@ $cssScript = @"
     }
 
     try {
-        $section = "Public IP Address and ISP Information"
+        $section = 'Public IP Address and ISP Information'
         Transcript -Section $section -SubHeader
     
         Internet    
@@ -1140,7 +1140,7 @@ $cssScript = @"
     }
 
     try {
-        $section = "Internet Connection Speed and Ping Test"
+        $section = 'Internet Connection Speed and Ping Test'
         Transcript -Section $section -SubHeader
     
         Internet
@@ -1155,13 +1155,13 @@ $cssScript = @"
             $pingAF = Ping($serverAF)
 
             $finalSpeedResult = New-Object PSObject
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Downdload Speed (Avg)" -value {if ($SpeedResult -eq $null) {"Test Failed"} ElseIf ($SpeedResult -ge $minimumDownloadSpeed) {"$SpeedResult Mb/Sec - GOOD"} else {"$SpeedResult Mb/Sec - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(South America)" -value {if ($pingSA -eq $null) {"Test Failed"} Elseif ($pingSA -le $minimumPing) {"$pingSA ms - GOOD"} else {"$pingSA ms - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(North America)" -value {if ($pingNA -eq $null) {"Test Failed"} Elseif ($pingNA -le $minimumPing) {"$pingNA ms - GOOD"} else {"$pingNA ms - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(Europe)" -value {if ($pingEU -eq $null) {"Test Failed"} Elseif ($pingEU -le $minimumPing) {"$pingEU ms - GOOD"} else {"$pingEU ms - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(Asia)" -value {if ($pingAS -eq $null) {"Test Failed"} Elseif ($pingAS -le $minimumPing) {"$pingAS ms - GOOD"} else {"$pingAS ms - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(Oceania)" -value {if ($pingOC -eq $null) {"Test Failed"} Elseif ($pingOC -le $minimumPing) {"$pingOC ms - GOOD"} else {"$pingOC ms - BAD"}}
-            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name "Ping(Africa)" -value {if ($pingAF -eq $null) {"Test Failed"} Elseif ($pingAF -le $minimumPing) {"$pingAF ms - GOOD"} else {"$pingAF ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Downdload Speed (Avg)' -value {if ($SpeedResult -eq $null) {'Test Failed'} ElseIf ($SpeedResult -ge $minimumDownloadSpeed) {"$SpeedResult Mb/Sec - GOOD"} else {"$SpeedResult Mb/Sec - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(South America)' -value {if ($pingSA -eq $null) {'Test Failed'} Elseif ($pingSA -le $minimumPing) {"$pingSA ms - GOOD"} else {"$pingSA ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(North America)' -value {if ($pingNA -eq $null) {'Test Failed'} Elseif ($pingNA -le $minimumPing) {"$pingNA ms - GOOD"} else {"$pingNA ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(Europe)' -value {if ($pingEU -eq $null) {'Test Failed'} Elseif ($pingEU -le $minimumPing) {"$pingEU ms - GOOD"} else {"$pingEU ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(Asia)' -value {if ($pingAS -eq $null) {'Test Failed'} Elseif ($pingAS -le $minimumPing) {"$pingAS ms - GOOD"} else {"$pingAS ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(Oceania)' -value {if ($pingOC -eq $null) {'Test Failed'} Elseif ($pingOC -le $minimumPing) {"$pingOC ms - GOOD"} else {"$pingOC ms - BAD"}}
+            Add-Member -inputObject $finalSpeedResult -memberType ScriptProperty -name 'Ping(Africa)' -value {if ($pingAF -eq $null) {'Test Failed'} Elseif ($pingAF -le $minimumPing) {"$pingAF ms - GOOD"} else {"$pingAF ms - BAD"}}
             $speedTestHTML = $finalSpeedResult | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
         } else {
             $speedTestHTML = $script:subHeader + $script:noData + $script:postContent
@@ -1175,7 +1175,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get CPU Info
-    $section = "CPU Information"
+    $section = 'CPU Information'
     Transcript -Section $section
 
     try {
@@ -1185,7 +1185,7 @@ $cssScript = @"
             $wmiProc | Select-Object -Property `
             @{n='CPU ID'; e={$_.DeviceID}},
             @{n='CPU Model'; e={$_.Name}},
-            @{n='CPU Manufacturer'; e={If ($_.Manufacturer -like "*intel*") {"Intel"} Else {$_.Manufacturer}}},
+            @{n='CPU Manufacturer'; e={If ($_.Manufacturer -like '*intel*') {'Intel'} Else {$_.Manufacturer}}},
             @{n='Number of Cores'; e={$_.NumberOfCores}},
             @{n='Number of Logical Processors'; e={$_.NumberOfLogicalProcessors}}
         }
@@ -1197,7 +1197,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Storage Info
-    $section = "Storage Information"
+    $section = 'Storage Information'
     Transcript -Section $section
 
     try {
@@ -1219,7 +1219,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Graphic Cards Info
-    $section = "Graphics Information"
+    $section = 'Graphics Information'
     Transcript -Section $section
 
     try {
@@ -1229,7 +1229,7 @@ $cssScript = @"
             $wmiGPU | Select-Object -Property `
             @{n='Graphic Card Name'; e={$_.Name}},
             @{n='Resolution'; e={$_.VideoModeDescription}},
-            @{Expression={[math]::Round($_.AdapterRAM / 1GB)};Label="Graphics Memory (GB)"},
+            @{Expression={[math]::Round($_.AdapterRAM / 1GB)};Label='Graphics Memory (GB)'},
             @{n='Graphic Card Status'; e={$_.Status}}
         }
         $graphicsHTML = $graphics | ConvertTo-Html -As Table -Fragment -PreContent $script:preContent -PostContent $script:postContent
@@ -1240,14 +1240,14 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Audio/Video Devices Info
-    $section = "Audio/Video Devices"
+    $section = 'Audio/Video Devices'
     Transcript -Section $section
 
     try {
-        $section = "WebCameras"
+        $section = 'WebCameras'
         Transcript -Section $section -SubHeader
 
-        $webcam =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like "camera") -or ($_.PNPClass -eq "Image" -and $_.Name -like "*Camera*") -or ($_.PNPClass -eq "Image" -and $_.Name -like "*Webcam*")} | select Name, Description, Manufacturer, Present, Status -Unique
+        $webcam =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'camera') -or ($_.PNPClass -eq 'Image' -and $_.Name -like '*Camera*') -or ($_.PNPClass -eq 'Image' -and $_.Name -like '*Webcam*')} | Select-Object Name, Description, Manufacturer, Present, Status -Unique
         if ($webcam) {
             $webcamHTML = $webcam | ConvertTo-Html -As Table -Fragment -PreContent "$script:preContent $script:subHeader"
         } else {
@@ -1258,10 +1258,10 @@ $cssScript = @"
     }
 
     try {
-        $section = "Speakers"
+        $section = 'Speakers'
         Transcript -Section $section -SubHeader
            
-        $speakerDevice =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like "audio*") -and ($_.Name -like "*Speaker*" -or $_.Name -like "Remote Audio Device")}| select Name, Description, Manufacturer, Present, Status -Unique
+        $speakerDevice =  Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'audio*') -and ($_.Name -like '*Speaker*' -or $_.Name -like 'Remote Audio Device')}| Select-Object Name, Description, Manufacturer, Present, Status -Unique
         if ($speakerDevice) {
         $speakerDeviceHTML = $speakerDevice | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader
         } else {
@@ -1272,10 +1272,10 @@ $cssScript = @"
     }
 
     try {
-        $section = "Microphones"
+        $section = 'Microphones'
         Transcript -Section $section -SubHeader
                         
-        $micDevice =   Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like "audio*") -and ($_.Name -like "*Microphone*"-or $_.Name -like "Remote Audio Device")} | select Name, Description, Manufacturer, Present, Status -Unique
+        $micDevice =   Get-WmiObject Win32_PnPEntity | Where-Object {($_.PNPClass -like 'audio*') -and ($_.Name -like '*Microphone*'-or $_.Name -like 'Remote Audio Device')} | Select-Object Name, Description, Manufacturer, Present, Status -Unique
         if ($micDevice) {
         $micDeviceHTML = $micDevice | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
         } else {
@@ -1289,11 +1289,11 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Plug & Play Devices
-    $section = "Plug & Play Devices"
+    $section = 'Plug & Play Devices'
     Transcript -Section $section
 
     try {
-        $pnpDevices = Get-PnpDevice | Where-Object {$_.friendlyname -ne ""} | Select-Object FriendlyName,Class,Status -Unique | Sort-Object Class
+        $pnpDevices = Get-PnpDevice | Where-Object {$_.friendlyname -ne ''} | Select-Object FriendlyName,Class,Status -Unique | Sort-Object Class
     
         $pnp = foreach ($pnpDevice in $pnpDevices) {
             $pnpDevice | Select-Object -Property `
@@ -1309,23 +1309,23 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Driver Info
-    $section = "Driver Information"
+    $section = 'Driver Information'
     Transcript -Section $section
 
     try {
-        $wmiOS = Get-WmiObject –Class Win32_OperatingSystem
-        $wmiDrivers = Get-WmiObject Win32_PnPSignedDriver | Where-Object {$_.driverprovidername -notlike "" -or $_.devicename -notlike ""} | Sort-Object DeviceName
+        $wmiOS = Get-WmiObject -Class Win32_OperatingSystem
+        $wmiDrivers = Get-WmiObject Win32_PnPSignedDriver | Where-Object {$_.driverprovidername -notlike '' -or $_.devicename -notlike ''} | Sort-Object DeviceName
     
         $drivers = foreach ($wmiDriver in $wmiDrivers) {
             $wmiDriver | Select-Object -Property `
             @{n='Device Name'; e={$wmiDriver.devicename}},
             @{n='Driver Version'; e={$wmiDriver.driverversion}},
-            @{n='Driver Date'; e={$wmiOS.ConvertToDateTime($_.DriverDate).ToString("dd-MM-yyyy")}},
+            @{n='Driver Date'; e={$wmiOS.ConvertToDateTime($_.DriverDate).ToString('dd-MM-yyyy')}},
             @{n='Driver Provider Name'; e={`
-                If ($wmiDriver.driverprovidername -like "*intel*") {
-                    "Intel"
-                } ElseIf ($wmiDriver.driverprovidername -like "*realtek*") {
-                    "Realtek"
+                If ($wmiDriver.driverprovidername -like '*intel*') {
+                    'Intel'
+                } ElseIf ($wmiDriver.driverprovidername -like '*realtek*') {
+                    'Realtek'
                 } Else {
                     $wmiDriver.driverprovidername
                 }
@@ -1339,7 +1339,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Services
-    $section = "Services Statuses"
+    $section = 'Services Statuses'
     Transcript -Section $section
     try {
         $services = Get-WmiObject win32_service | Select-Object DisplayName, Name, StartMode, State | Sort-Object StartMode, State, DisplayName
@@ -1351,11 +1351,11 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Group Policy Results Report
-    $section = "Resultant Set of Policies (GPOs / GPResult)"
+    $section = 'Resultant Set of Policies (GPOs / GPResult)'
     Transcript -Section $section
     try {
-        New-Item -Path "$logFolder\Windows" -ItemType Directory | Out-Null
-        gpresult.exe /USER $currentLoggedUser /H "$logFolder\Windows\GPResult.html"
+        $null = New-Item -Path "$logFolder\Windows" -ItemType Directory
+        & "$env:windir\system32\gpresult.exe" /USER $currentLoggedUser /H "$logFolder\Windows\GPResult.html"
         $gpoHTML = $script:preContent + '<iframe src="LogFiles/Windows/GPResult.html" width="100%" height="500" style="border:none;"></iframe></div>'
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1364,20 +1364,25 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Installed Software and Versions
-    $section = "Installed Software and Versions"
+    $section = 'Installed Software and Versions'
     Transcript -Section $section
 
     try {
-        $tempSW = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -notlike ""} | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
-        $tempSW += Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -notlike ""} | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
+        $tempSW1 = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -notlike ''} | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
+        $tempSW2 = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -notlike ''} | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate
+        $tempSW = $tempSW1 + $tempSW2
     
-        $installedApps = $tempSW | Where-Object {$_.InstallDate -notlike ""} | Select-Object `
-            @{n='Name'; e={$_.DisplayName}},
-            @{n='Version'; e={$_.DisplayVersion}},
-            @{n='Publisher'; e={$_.Publisher}},
-            @{n='Installed On'; e={Get-Date ([datetime]::parseexact($_.InstallDate, 'yyyyMMdd', $null)) -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}} -Unique | `
-            Sort-Object Name
-        $installedAppsHTML = $installedApps | ConvertTo-Html -As Table -Fragment -PreContent $script:preContent -PostContent $script:postContent
+        if ($tempSW) {
+            $installedApps = $tempSW | Where-Object {$_.InstallDate -notlike ''} | Select-Object `
+                @{n='Name'; e={$_.DisplayName}},
+                @{n='Version'; e={$_.DisplayVersion}},
+                @{n='Publisher'; e={$_.Publisher}},
+                @{n='Installed On'; e={Get-Date ([datetime]::parseexact($_.InstallDate, 'yyyyMMdd', $null)) -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}} -Unique | `
+                Sort-Object Name
+            $installedAppsHTML = $installedApps | ConvertTo-Html -As Table -Fragment -PreContent $script:preContent -PostContent $script:postContent
+        } else {
+            $installedAppsHTML = $script:preContent + '<p>Not Software Installed</p>' + $script:postContent
+        }
     } catch {
         Transcript -Section "Failed: $section `n$_"
     }
@@ -1385,12 +1390,11 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Windows Update Status
-    $section = "Windows Update Status"
-    $sectionHeader = '<hr><p id="ListHeader"><b>Hotfixes Installed:</b></p>'
+    $section = 'Windows Update Status'
     Transcript -Section $section
 
     try {
-        $section = "Hotfixes Installed"
+        $section = 'Hotfixes Installed'
         Transcript -Section $section -SubHeader
     
         $kbs = Get-HotFix
@@ -1400,7 +1404,7 @@ $cssScript = @"
             @{n='KB'; e={$kb.HotFixID}},
             @{n='KB Type'; e={$kb.Description}},
             @{n='Installed On'; e={Get-Date $kb.installedon -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}} ,
-            @{n='Installed By'; e={$kb.InstalledBy}} | Sort-Object -Descending "Installed On"
+            @{n='Installed By'; e={$kb.InstalledBy}} | Sort-Object -Descending 'Installed On'
         }
         $hotFixesHTML = $hotFixes | ConvertTo-Html -As Table -Fragment -PreContent "$script:preContent $script:subHeader"
     } catch {
@@ -1408,7 +1412,7 @@ $cssScript = @"
     }
 
     try {
-        $section = "Pending Updates"
+        $section = 'Pending Updates'
         Transcript -Section $section -SubHeader
 
         Internet
@@ -1416,19 +1420,23 @@ $cssScript = @"
 
             $session = New-Object -ComObject Microsoft.Update.Session
             $searcher = $session.CreateUpdateSearcher()
-            $searchResults = $searcher.Search("IsInstalled=0")
-            $missingUpdates = $searchResults.RootCategories | ForEach-Object {
-                foreach ($update in $_.Updates) {
-                    $update | Select-Object -Property `
-                    @{n='KB'; e={[Regex]::Match($update.Title, "^.*\b(KB[0-9]+)\b.*$").Groups[1].Value}},
-                    @{n='Category'; e={$_.Name}},
-                    @{n='Title'; e={$update.Title}},
-                    @{n='Type'; e={$update.Type}},
-                    @{n='Downloaded'; e={$update.IsDownloaded}}
+            $searchResults = $searcher.Search('IsInstalled=0')
+            if ($searchResults) {
+                if ($missingUpdates) {
+                    $missingUpdates = $searchResults.RootCategories | ForEach-Object {
+                        foreach ($update in $_.Updates) {
+                            $update | Select-Object -Property `
+                            @{n='KB'; e={[Regex]::Match($update.Title, '^.*\b(KB[0-9]+)\b.*$').Groups[1].Value}},
+                            @{n='Category'; e={$_.Name}},
+                            @{n='Title'; e={$update.Title}},
+                            @{n='Type'; e={$update.Type}},
+                            @{n='Downloaded'; e={$update.IsDownloaded}}
+                        }
+                    }
+                    $missingUpdatesHTML = $missingUpdates | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
+                } else {
+                    $missingUpdatesHTML = $script:subHeader + '<p>No Updates Missing</p>' + $script:postContent
                 }
-            }
-            if ($missingUpdates) {
-                $missingUpdatesHTML = $missingUpdates | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
             } else {
                 $missingUpdatesHTML = $script:subHeader + $script:noData + $script:postContent
             }
@@ -1443,12 +1451,12 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Event Viewers Alerts Since Last Boot Time
-    $section = "Event Viewers Alerts Since Last Boot Time"
+    $section = 'Event Viewers Alerts Since Last Boot Time'
     Transcript -Section $section
 
     try {
-        $tempLogsApp = Get-EventLog -LogName Application -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"Application"}}, EventID, EntryType, Source, TimeGenerated, Message
-        $tempLogsSys = Get-EventLog -LogName System -EntryType "Error","Warning" -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={"System"}}, EventID, EntryType, Source, TimeGenerated, Message
+        $tempLogsApp = Get-EventLog -LogName Application -EntryType 'Error','Warning' -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={'Application'}}, EventID, EntryType, Source, TimeGenerated, Message
+        $tempLogsSys = Get-EventLog -LogName System -EntryType 'Error','Warning' -After $bootTime.'Last Boot Time' | Select-Object -property @{n='Log'; e={'System'}}, EventID, EntryType, Source, TimeGenerated, Message
         $tempLogs = $tempLogsApp + $tempLogsSys
         $eventLogs = $tempLogs | Select-Object -Property `
             @{n='Log'; e={$_.Log}},
@@ -1456,7 +1464,7 @@ $cssScript = @"
             @{n='Event Type'; e={$_.EntryType}},
             @{n='Event Source'; e={$_.Source}},
             @{n='Time Generated'; e={Get-Date $_.TimeGenerated -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}},
-            @{n='Message'; e={$_.Message}} -Unique | Sort-Object -Descending "Time Generated"
+            @{n='Message'; e={$_.Message}} -Unique | Sort-Object -Descending 'Time Generated'
         $eventLogsHTML = $eventLogs | ConvertTo-Html -As Table -Fragment -PreContent $script:preContent -PostContent $script:postContent
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1465,14 +1473,14 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get Performance Report
-    $section = "Performance Report"
+    $section = 'Performance Report'
     Transcript -Section $section
 
     try {
-        $parameters2remove = "delete -n Perf"
+        $parameters2remove = 'delete -n Perf'
         $perfXML | Out-File $perfFolder\Perf.xml
         $parameters2import = "import -n Perf -xml $perfFolder\Perf.xml"
-        $parameters2start = "start -n Perf"
+        $parameters2start = 'start -n Perf'
         Remove-Item -Recurse "$env:windir\Temp\LogCollector\*" -Force -ErrorAction Ignore
         Start-Process "$env:windir\system32\logman.exe" -WindowStyle hidden $parameters2remove -verb runas -Wait -ErrorAction Ignore
         Start-Process "$env:windir\system32\logman.exe" -WindowStyle hidden $parameters2import -verb runas -Wait
@@ -1490,41 +1498,49 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Get MDM Information
-    $section = "MDM Information"
+    $section = 'MDM Information'
     Transcript -Section $section
 
     try {
-        $section = "MDM Summary"
-        Transcript -Section $section -SubHeader
     
-        New-Item -Path "$logFolder\MDM" -ItemType Directory | Out-Null
-        $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority -ErrorAction Ignore | Select-Object -ExpandProperty AuthorityName
-        $mdmDiagParam = "-out $env:windir\Temp\LogCollector\MDM\"
-        Start-Process "$env:windir\system32\MdmDiagnosticsTool.exe" -WindowStyle hidden $mdmDiagParam -verb runas -Wait
-        $MDMDiagReportPath = Get-ChildItem "$env:windir\Temp\LogCollector\MDM\*.html" | Select-Object -ExpandProperty FullName -ErrorAction Ignore
-        $MDMSummary = New-Object PSObject
-        Add-Member -inputObject $MDMSummary -memberType ScriptProperty -name "MDM Authority" -value {If ($MDMServer) {$MDMServer} Else {"Unable to find a MDM Authority for this device"}}
-        Add-Member -inputObject $MDMSummary -memberType ScriptProperty -name "MDM Diagnostic Report" -value {If (Test-Path $MDMDiagReportPath) {Hyperlink -linkPath "$logFolder\MDM\MDMDiagReport.html" ; $script:htmlLink} Else {"Not Available"}}
-        $MDMDiagReportHTML = $MDMSummary | ConvertTo-Html -As List -Fragment -PreContent "$script:preContent $script:subHeader"
-    } catch {
-        Transcript -Section "Failed: $section `n$_"
-    }
-
-    try {
-        $section = "MDM Alerts"
+        $section = 'MDM Summary'
         Transcript -Section $section -SubHeader
+        $MDMServer = Get-CimInstance -Namespace root\cimv2\mdm -ClassName MDM_MgmtAuthority -ErrorAction Ignore | Select-Object -ExpandProperty AuthorityName
+        if ($MDMServer) {
+            $mdmDiagParam = "-out $env:windir\Temp\LogCollector\MDM"
+            Start-Process "$env:windir\system32\MdmDiagnosticsTool.exe" -WindowStyle hidden $mdmDiagParam -verb runas -Wait
+            $MDMDiagFiles = Get-ChildItem "$env:windir\Temp\LogCollector\MDM" -ErrorAction Ignore
+            if ($MDMDiagFiles) {
+                $null = New-Item -Path "$logFolder\MDM" -ItemType Directory
+                Copy-Item -Path "$env:windir\Temp\LogCollector\MDM\*" -Destination "$logFolder\MDM\" -Force
+                $MDMDiagReportPath = Get-ChildItem "$env:windir\Temp\LogCollector\MDM\*.html" | Select-Object -ExpandProperty FullName -ErrorAction Ignore
+            }
+            $MDMSummary = New-Object PSObject
+            Add-Member -inputObject $MDMSummary -memberType NoteProperty -name 'MDM Authority' -value $MDMServer
+            if ($MDMDiagReportPath) {
+                Add-Member -inputObject $MDMSummary -memberType ScriptProperty -name 'MDM Diagnostic Report' -value {Hyperlink -linkPath "$logFolder\MDM\MDMDiagReport.html" ; $script:htmlLink}
+            } else {
+                Add-Member -inputObject $MDMSummary -memberType NoteProperty -name 'MDM Diagnostic Report' -value 'Not Available'
+            }
+            $MDMDiagReportHTML = $MDMSummary | ConvertTo-Html -As List -Fragment -PreContent "$script:preContent $script:subHeader"
 
-        if (Test-Path -Path "$env:windir\Temp\LogCollector\MDM\DeviceManagement-Enterprise-Diagnostics-Provider.evtx") {
-            $MDMAlerts = Get-WinEvent -Path "$env:windir\Temp\LogCollector\MDM\DeviceManagement-Enterprise-Diagnostics-Provider.evtx" | Where-Object {$_.LevelDisplayName -ne "Information"} | Select-Object -Property `
-            @{n='Log'; e={"MDM"}},
-            @{n='Event ID'; e={$_.Id}},
-            @{n='Event Type'; e={$_.LevelDisplayName}},
-            @{n='Time Generated'; e={Get-Date $_.TimeCreated -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}},
-            @{n='Message'; e={$_.Message}} -Unique | Sort-Object -Descending "Time Generated"
-            Copy-Item -Path "$env:windir\Temp\LogCollector\MDM\*" -Destination "$logFolder\MDM\" -Force
-            $MDMAlertsHTML = $MDMAlerts | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
+            $section = 'MDM Alerts'
+            Transcript -Section $section -SubHeader
+            
+            if (Test-Path -Path "$env:windir\Temp\LogCollector\MDM\DeviceManagement-Enterprise-Diagnostics-Provider.evtx") {
+                $MDMAlerts = Get-WinEvent -Path "$env:windir\Temp\LogCollector\MDM\DeviceManagement-Enterprise-Diagnostics-Provider.evtx" | Where-Object {$_.LevelDisplayName -ne 'Information'} | Select-Object -Property `
+                @{n='Log'; e={'MDM'}},
+                @{n='Event ID'; e={$_.Id}},
+                @{n='Event Type'; e={$_.LevelDisplayName}},
+                @{n='Time Generated'; e={Get-Date $_.TimeCreated -Format $culture.DateTimeFormat.UniversalSortableDateTimePattern}},
+                @{n='Message'; e={$_.Message}} -Unique | Sort-Object -Descending 'Time Generated'
+                $MDMAlertsHTML = $MDMAlerts | ConvertTo-Html -As Table -Fragment -PreContent $script:subHeader -PostContent $script:postContent
+            } else {
+                $MDMAlertsHTML = $script:subHeader + $script:noData + $script:postContent
+            }
         } else {
-            $MDMAlertsHTML = $script:subHeader + $script:noData + $script:postContent
+            $MDMDiagReportHTML = $script:preContent + '<p>Not MDM Managed</p>' + $script:postContent
+            $MDMAlertsHTML = ''
         }
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1533,7 +1549,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Collect CBS Log
-    $section = "CBS Log"
+    $section = 'CBS Log'
     Transcript -Section $section
 
     try {
@@ -1547,7 +1563,7 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Collect Windows Update Log
-    $section = "Windows Update Log"
+    $section = 'Windows Update Log'
     Transcript -Section $section
     try {
         $Job1 = Start-Job -ScriptBlock {Get-WindowsUpdateLog -LogPath "$logFolder\Windows\WindowsUpdate.log"}
@@ -1559,22 +1575,22 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Collect Event Viewer Logs from System and Application filtered based on events since last boot time
-    $section = "Event Viewer: Application Events Since Last Reboot"
+    $section = 'Event Viewer: Application Events Since Last Reboot'
     Transcript -Section $section
 
     try {
-        $appLog = $logFolder + "\Windows\EventViewer - Application.evtx"
-        wevtutil epl Application $appLog "/q:*[System[TimeCreated[@SystemTime>='$bootTimestampForLogs' and @SystemTime<='$currentTimestampForLogs']]]"
+        $appLog = $logFolder + '\Windows\EventViewer - Application.evtx'
+        & "$env:windir\system32\wevtutil.exe" epl Application $appLog "/q:*[System[TimeCreated[@SystemTime>='$bootTimestampForLogs' and @SystemTime<='$currentTimestampForLogs']]]"
     } catch {
         Transcript -Section "Failed: $section `n$_"
     }
 
-    $section = "Event Viewer: System Events Since Last Reboot"
+    $section = 'Event Viewer: System Events Since Last Reboot'
     Transcript -Section $section
 
     try {
-        $sysLog = $logFolder + "\Windows\EventViewer - System.evtx"
-        wevtutil epl System $sysLog "/q:*[System[TimeCreated[@SystemTime>='$bootTimestampForLogs' and @SystemTime<='$currentTimestampForLogs']]]"
+        $sysLog = $logFolder + '\Windows\EventViewer - System.evtx'
+        & "$env:windir\system32\wevtutil.exe" epl System $sysLog "/q:*[System[TimeCreated[@SystemTime>='$bootTimestampForLogs' and @SystemTime<='$currentTimestampForLogs']]]"
     } catch {
         Transcript -Section "Failed: $section `n$_"
     }
@@ -1582,15 +1598,15 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Collect SCCM Logs
-    $section = "SCCM Logs"
+    $section = 'SCCM Logs'
     Transcript -Section $section
 
     try {
         If (Test-Path "$env:windir\CCM\Logs") {
-            md "$logFolder\SCCM" | Out-Null
+            $null = mkdir "$logFolder\SCCM"
             Copy-Item -Path "$env:windir\CCM\Logs\*" -Destination "$logFolder\SCCM\" -Force
         } Else {
-            Transcript -Section "No SCCM logs available"
+            Transcript -Section 'No SCCM logs available'
         }
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1599,25 +1615,25 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Collect VMWare Logs
-    $section = "VMWare Logs"
+    $section = 'VMWare Logs'
     Transcript -Section $section
 
     try {
         $vmwareClientLogsPath = "$env:SystemDrive\Users\$currentLoggedUser\AppData\Local\VMware\VDM\Logs"
         $vmwareAgentLogsPath = "$env:ProgramData\VMware\VDM\logs"
         If (Test-Path $vmwareClientLogsPath) {
-            New-Item -Path "$logFolder\VMWareHorizon\Client\" -ItemType Directory | Out-Null
+            $null = New-Item -Path "$logFolder\VMWareHorizon\Client\" -ItemType Directory
             Copy-Item -Path "$vmwareClientLogsPath\*" -Destination "$logFolder\VMWareHorizon\Client\" -Container -Recurse
         }
         Else {
-            Transcript -Section "No VMWare Horizon Client logs available"
+            Transcript -Section 'No VMWare Horizon Client logs available'
         }
         If (Test-Path $vmwareAgentLogsPath) {
-            New-Item -Path "$logFolder\VMWareHorizon\Agent\" -ItemType Directory | Out-Null
+            $null = New-Item -Path "$logFolder\VMWareHorizon\Agent\" -ItemType Directory
             Copy-Item -Path "$vmwareAgentLogsPath\*" -Destination "$logFolder\VMWareHorizon\Agent\" -Container -Recurse
         }
         Else {
-            Transcript -Section "No VMWare Horizon Agent logs available"
+            Transcript -Section 'No VMWare Horizon Agent logs available'
         }
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1626,25 +1642,25 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Compile a List of Logs Collected
-    $section = "List of Logs Collected"
+    $section = 'List of Logs Collected'
     Transcript -Section $section
 
     try {
-        $section = "Logs Available Offline"
+        $section = 'Logs Available Offline'
         Transcript -Section $section -SubHeader
     
         $otherLogs = New-Object PSObject
-        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name "Other Windows Logs" -value {If (Test-Path "$logFolder\Windows") {Hyperlink -linkPath "$logFolder\Windows" ; $script:htmlLink} Else {"Not Available"}}
-        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name "MDM Logs" -value {If (Test-Path "$logFolder\MDM") {Hyperlink -linkPath "$logFolder\MDM" ; $script:htmlLink} Else {"Not Available"}}
-        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name "SCCM Logs" -value {If (Test-Path "$logFolder\SCCM") {Hyperlink -linkPath "$logFolder\SCCM" ; $script:htmlLink} Else {"Not Available"}}
-        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name "VMWare Logs" -value {If (Test-Path "$logFolder\VMWareHorizon") {Hyperlink -linkPath "$logFolder\VMWareHorizon" ; $script:htmlLink} Else {"Not Available"}}
+        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name 'Other Windows Logs' -value {If (Test-Path "$logFolder\Windows") {Hyperlink -linkPath "$logFolder\Windows" ; $script:htmlLink} Else {'Not Available'}}
+        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name 'MDM Logs' -value {If (Test-Path "$logFolder\MDM") {Hyperlink -linkPath "$logFolder\MDM" ; $script:htmlLink} Else {'Not Available'}}
+        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name 'SCCM Logs' -value {If (Test-Path "$logFolder\SCCM") {Hyperlink -linkPath "$logFolder\SCCM" ; $script:htmlLink} Else {'Not Available'}}
+        Add-Member -inputObject $otherLogs -memberType ScriptProperty -name 'VMWare Logs' -value {If (Test-Path "$logFolder\VMWareHorizon") {Hyperlink -linkPath "$logFolder\VMWareHorizon" ; $script:htmlLink} Else {'Not Available'}}
         $otherLogsHTMl = $otherLogs | ConvertTo-Html -As List -Fragment -PreContent "$script:preContent $script:subHeader"
     } catch {
         Transcript -Section "Failed: $section `n$_"
     }
 
     try {
-        $section = "Full Memory Dumps (Only Listing - Not Collected Due to Their File Size)"
+        $section = 'Full Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
         Transcript -Section $section -SubHeader
         $fullDumpPath = "$env:SystemRoot\*.dmp"
         If (Test-Path $fullDumpPath) {
@@ -1654,7 +1670,7 @@ $cssScript = @"
             $memoryDumpHTML = $script:subHeader + '<p>No Full Memory Dump Stored</p>'
         }
 
-        $section = "Mini Memory Dumps (Only Listing - Not Collected Due to Their File Size)"
+        $section = 'Mini Memory Dumps (Only Listing - Not Collected Due to Their File Size)'
         Transcript -Section $section -SubHeader
         $miniDumpPath = "$env:SystemRoot\minidump\*.dmp"
         If (Test-Path $miniDumpPath) {
@@ -1672,10 +1688,10 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Generate HTML Report
-    $section = "Compiling HTML Report"
+    $section = 'Compiling HTML Report'
     Transcript -Section $section
 
-    $section = "Conditional Formatting"
+    $section = 'Conditional Formatting'
     Transcript -Section $section
     $basicInfoHTML = $basicInfoHTML -replace 'True','<font color="red">True</font>'
     $localUsersHTML = $localUsersHTML -replace 'Disabled','<font color="red">Disabled</font>'
@@ -1701,18 +1717,17 @@ $cssScript = @"
     $LogsHTMl = $LogsHTMl -replace 'END','</a>'
 
     try {
-        $section = "Assembling HTML Skeleton"
+        $section = 'Assembling HTML Skeleton'
         Transcript -Section $section
     
         #Putting all Together
         $body = "$header $basicInfoHTML $localUsersHTML $netHTML $cpuHTML $disksHTML $graphicsHTML $audioVideoDevicesHTML $pnpHTML $driversHTML $servicesHTML $gpoHTML $installedAppsHTML $windowsUpdateHTML $eventLogsHTML $perfmonHTML $MDMDiagReportHTML $MDMAlertsHTML $LogsHTMl"
-        $footer = "<p id='Footer'>Report Creation Date: $(Get-Date -Format "dd-MM-yyyy HH:mm")<br>$footer</p>"
+        $footer = "<p id='Footer'>Report Creation Date: $(Get-Date -Format 'dd-MM-yyyy HH:mm')<br>$footer</p>"
  
-        $section = "Generating Final HTML"
+        $section = 'Generating Final HTML'
         Transcript -Section $section
        
         ConvertTo-HTML -Title $mainTitle -Head $cssStyles -Body $body -PostContent "$footer $cssScript" |  Out-File "$rootPath\Report - $env:computername - $currentDateTime.html"
-        $FinalReport = "$rootPath\Report - $env:computername - $currentDateTime.html"
     
     } catch {
         Transcript -Section "Failed: $section `n$_"
@@ -1721,14 +1736,14 @@ $cssScript = @"
 
     #-------------------------------------------------------------------------------------------
     #region Stop Transcript: Must be stopped at this point in order to allow creation of ZIP archive
-    Transcript -Section "Finishing"
+    Transcript -Section 'Finishing'
     Stop-Transcript
     #endregion
 
     #-------------------------------------------------------------------------------------------
     #region Compressing all collected files and creating the ZIP archive
     try {
-        $section = "Compiling Results"
+        $section = 'Compiling Results'
         Transcript -Section $section
         $zipName = Get-Item $rootPath | Select-Object -ExpandProperty Name
         Start-Sleep -Seconds 5 #Just to make sure the script has enough time to close all handles
@@ -1738,7 +1753,7 @@ $cssScript = @"
         Transcript -Section "Failed: $section `n$_"
     }
     #endregion
-    Transcript -Section "Completed"
+    Transcript -Section 'Completed'
 }
 
 #endregion
@@ -1749,9 +1764,9 @@ $cssScript = @"
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-[System.Windows.Forms.Application]::EnableVisualStyles()
+[Windows.Forms.Application]::EnableVisualStyles()
 
-$defaultLogo = @"
+$defaultLogo = @'
 iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAFcASURBVHhe7b0HmCRneS18qrqqOueevDOzO5u0K2lXWQgh
 EEIiBxFkwASTjAPGGLDNc/kdZGO4XK5tTLINl2AbGbBkwPiSLwZhggBJKOyuNs9O2EmdU3VXV/zPWzPc35gkYUng3/1K/fROp6r6vvOd95wvFYYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEM
 YxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCG8VOHsvU8jJ9B3Hgj1G/ftEtPXXjKveUWeFsvh3HTTe/MjI3NXlXvWucOHH8tcPyz9548eWjpyJHGLbfc8n2f/XmMIbAe
@@ -1937,7 +1952,7 @@ ghFKiFDgDhMJQIQIiXUQbK5bDhDVFBBZpK0Il0YGt8LOzYEDBTp8h3ZyENAJ1t9S+VKN4csJJWFK9IBS
 W5C6z639NC5wurxfTM3mmvaRTbeqfbtSCR/zOW25+06233vcjf/uHxRBYPyZ+4ZZbvLXy7a8dHx+9fXpk5w8tWOohU/FVbzAYuAQU85IiPQGuH5BrPJdm3XcThu4WCwVXjWiurkVdw4i5Ki2apuuuqhuuI93Yqu5G9D
 jfN1yFv0FQubbtuQOPxp5/y++5QeDafsS1XNV1FY0GUXF1XePvqW5Ei7hkyR9Z+U964tOZaZP9mJEMXeNvvOkT7zi+uj5t+7HdJ84OXtvzlbu1RPSrudLMl1bLypu+8Pn5Sz7/wbue/dYP3PpT3QhzGMMYxjCGMYxh
 DGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxhDGMYwxjGMIYxjGEMYxjDGMYwhjGMYQxjGMMYxjCGMYxh/FcJ4P8F9ulnpiNaaZEAAAAASUVORK5CYII=
-"@
+'@
 $customLogo = $logoFile
 if (Test-Path $customLogo) {
     $logoBase64 = [convert]::ToBase64String((get-content $customLogo -encoding byte))
@@ -1960,9 +1975,9 @@ $objForm.Height = 520
 $objForm.MinimizeBox = $False
 $objForm.MaximizeBox = $False
 $objForm.FormBorderStyle = 'Fixed3D'
-$objForm.StartPosition = "CenterScreen"
+$objForm.StartPosition = 'CenterScreen'
 
-$Icon = [system.drawing.icon]::ExtractAssociatedIcon($PSHOME + "\powershell.exe")
+$Icon = [drawing.icon]::ExtractAssociatedIcon($PSHOME + '\powershell.exe')
 $objForm.Icon = $Icon
 
 #endregion
@@ -1970,7 +1985,7 @@ $objForm.Icon = $Icon
 #-------------------------------------------------------------------------------------------
 #region FORM: Title and Logo
 $img = [Drawing.Bitmap]::FromStream([IO.MemoryStream][Convert]::FromBase64String($logoBase64))
-[System.Windows.Forms.Application]::EnableVisualStyles();
+[Windows.Forms.Application]::EnableVisualStyles();
 $pictureBox = new-object Windows.Forms.PictureBox
 $pictureBox.Location = '340,5'
 $pictureBox.Width =  $img.Size.Width
@@ -1978,7 +1993,7 @@ $pictureBox.Height =  $img.Size.Height
 $pictureBox.Image = $img
 $objform.controls.add($pictureBox)
 
-$fontH1 = New-Object System.Drawing.Font("Segoe UI",22,[System.Drawing.FontStyle]::Bold)
+$fontH1 = New-Object System.Drawing.Font('Segoe UI',22,[Drawing.FontStyle]::Bold)
 $h1 = New-Object System.Windows.Forms.Label
 $h1.ForeColor = $customHexMainBackColor
 $h1.Location = '25,25'
@@ -1987,27 +2002,27 @@ $h1.Text = $mainTitle
 $h1.AutoSize = $True
 $objForm.Controls.Add($h1)
 
-$fontH2 = New-Object System.Drawing.Font("Segoe UI",16,[System.Drawing.FontStyle]::Regular)
+$fontH2 = New-Object System.Drawing.Font('Segoe UI',16,[Drawing.FontStyle]::Regular)
 $h2 = New-Object System.Windows.Forms.Label
-$h2.ForeColor = "Gray"
+$h2.ForeColor = 'Gray'
 $h2.Location = '25,75'
 $h2.Font = $fontH2
-$h2.Text = "Ultimate LOG Collector"
+$h2.Text = 'Ultimate LOG Collector'
 $h2.AutoSize = $True
 $objForm.Controls.Add($h2)
 
-$fontH3 = New-Object System.Drawing.Font("Verdana",12,[System.Drawing.FontStyle]::Bold)
+$fontH3 = New-Object System.Drawing.Font('Verdana',12,[Drawing.FontStyle]::Bold)
 $h3 = New-Object System.Windows.Forms.Label
-$h3.ForeColor = "Red"
+$h3.ForeColor = 'Red'
 $h3.Location = New-Object System.Drawing.Point(15,240)
 $h3.Font = $fontH3
-$h3.Text = "This process may take up to 10 minutes to complete"
+$h3.Text = 'This process may take up to 10 minutes to complete'
 $h3.AutoSize = $True
 $objForm.Controls.Add($h3)
 
 $objForm.KeyPreview = $True
-$objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") {Run}})
-$objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") {$objForm.Close()}})
+$objForm.Add_KeyDown({if ($_.KeyCode -eq 'Enter') {Run}})
+$objForm.Add_KeyDown({if ($_.KeyCode -eq 'Escape') {$objForm.Close()}})
 
 #endregion
 
@@ -2017,23 +2032,23 @@ $objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") {$objForm.Close()}})
 $progressBar = New-Object System.Windows.Forms.ProgressBar
 $progressBar.Location = New-Object System.Drawing.Point(10, 180)
 $progressBar.Size = New-Object System.Drawing.Size(480, 40)
-$progressBar.Style = "Marquee"
+$progressBar.Style = 'Marquee'
 $progressBar.MarqueeAnimationSpeed = 20
 $progressBar.Hide()
 $objForm.Controls.Add($progressBar)
 
-$fontLogOutput = New-Object System.Drawing.Font("Arial",9,[System.Drawing.FontStyle]::Regular)
+$fontLogOutput = New-Object System.Drawing.Font('Arial',9,[Drawing.FontStyle]::Regular)
 $logOutput = [hashtable]::Synchronized(@{})
 $logOutput = New-Object System.Windows.Forms.TextBox
 $logOutput.Location = New-Object System.Drawing.Size(10,245) 
 $logOutput.Size = New-Object System.Drawing.Size(480,115)
 $logOutput.Multiline = $True
-$logOutput.ScrollBars = "Vertical"
+$logOutput.ScrollBars = 'Vertical'
 $logOutput.AcceptsReturn = $True
 $logOutput.WordWrap = $True
 $logOutput.Font = $fontLogOutput
 $logOutput.ReadOnly = $True
-$logOutput.Text = ""
+$logOutput.Text = ''
 $logOutput.Hide()
 $objForm.Controls.Add($logOutput)
 
@@ -2043,18 +2058,18 @@ $objForm.Controls.Add($logOutput)
 #region FORM: Buttons
 
 $lineButtons = New-Object System.Windows.Forms.Label
-$lineButtons.ForeColor = "Gray"
+$lineButtons.ForeColor = 'Gray'
 $lineButtons.Location = '5,383'
 $lineButtons.Height = 2
 $lineButtons.Width = 490
-$lineButtons.BorderStyle = "Fixed3D"
+$lineButtons.BorderStyle = 'Fixed3D'
 $lineButtons.AutoSize = $False
 $objForm.Controls.Add($lineButtons)
 
 $buttonRun = New-Object System.Windows.Forms.Button 
 $buttonRun.Location = New-Object System.Drawing.Size(50,400) 
 $buttonRun.Size = New-Object System.Drawing.Size(150,30) 
-$buttonRun.Text = "Run" 
+$buttonRun.Text = 'Run' 
 $buttonRun.Add_Click({Run}) 
 $objForm.Controls.Add($buttonRun)
 
@@ -2079,17 +2094,17 @@ $objForm.Controls.Add($buttonAbort)
 #region FORM: Footer
 
 $lineFooter = New-Object System.Windows.Forms.Label
-$lineFooter.ForeColor = "Gray"
+$lineFooter.ForeColor = 'Gray'
 $lineFooter.Location = '5,445'
 $lineFooter.Height = 2
 $lineFooter.Width = 490
-$lineFooter.BorderStyle = "Fixed3D"
+$lineFooter.BorderStyle = 'Fixed3D'
 $lineFooter.AutoSize = $False
 $objForm.Controls.Add($lineFooter)
 
-$fontFooter = New-Object System.Drawing.Font("Verdana",8,[System.Drawing.FontStyle]::Regular)
+$fontFooter = New-Object System.Drawing.Font('Verdana',8,[Drawing.FontStyle]::Regular)
 $labelFooter = New-Object System.Windows.Forms.Label
-$labelFooter.ForeColor = "Gray"
+$labelFooter.ForeColor = 'Gray'
 
 $labelFooter.Font = $fontFooter
 $labelFooter.Text = "$footer`n "
