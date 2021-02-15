@@ -64,7 +64,7 @@
 # CUSTOMIZATION / BRANDING: Here you can change the following values in order to customize the look & feel of the tool:
 $mainTitle = 'THOTH'                                                         # Main Title
 $logoFile = 'C:\Example\Logo.png'                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
-$footer = 'Created by Rafael Machado (rafaelcarneiromachado@gmail.com)'      # Information placed at the end of the HTML Report
+$footer = 'THOTH Version 1.0.0 - Created by Rafael Machado'                  # Information placed at the end of the HTML Report
 $backgroundColor = '#3B3B3B'                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
 $foregroundColor = '#FFFFFF'                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
 $itDept = 'your IT Department'
@@ -249,7 +249,7 @@ function Invoke-ThothScan {
     # CUSTOMIZATION / BRANDING: Here you can change the following values in order to customize the look & feel of the tool:
     $mainTitle = 'THOTH'                                                         # Main Title
     $logoFile = 'C:\Example\Logo.png'                                            # In case you want to replace the default Logo. Make sure to type a full path to a .PNG file, transparent and with a 150x150px size
-    $footer = 'Created by Rafael Machado (rafaelcarneiromachado@gmail.com)'      # Information placed at the end of the HTML Report
+    $footer = 'THOTH Version 1.0.0 - Created by Rafael Machado'                  # Information placed at the end of the HTML Report
     $backgroundColor = '#3B3B3B'                                                 # Hex value for the main background color that will be applied to the elements of the HTML report
     $foregroundColor = '#FFFFFF'                                                 # Hex value for the main foreground color (Font Colors) that will be applied to the elements of the HTML report
     #-------------------------------------------------------------------------------------------
